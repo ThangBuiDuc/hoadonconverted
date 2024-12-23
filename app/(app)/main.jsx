@@ -4,7 +4,10 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 import { Button } from "@nextui-org/button";
-import { apiSearch } from "@/ultis";
+import { fetchAllPages } from "@/ultis";
+import { useQueries } from "@tanstack/react-query";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 const options = [
   { value: "buy", label: "Mua" },
@@ -12,12 +15,34 @@ const options = [
 ];
 
 function getMonthsInRange(start, end) {
+  let localStart = start.clone();
+  let localEnd = end.clone();
   const months = [];
 
   // Loop through the months between start and end dates
-  while (start.isBefore(end) || start.isSame(end, "month")) {
-    months.push(start.month() + 1); // Push the month number (1 = January, 12 = December)
-    start.add(1, "month");
+  while (
+    localStart.isBefore(localEnd) ||
+    localStart.isSame(localEnd, "month")
+  ) {
+    if (start.month() + 1 === localStart.month() + 1) {
+      months.push({
+        start: start.format("DD/MM/yyyy"),
+        end: start.endOf("month").format("DD/MM/yyyy"),
+      }); // Push the month number (1 = January, 12 = December)
+      localStart.add(1, "month");
+    } else if (localStart.month() + 1 === localEnd.month() + 1) {
+      months.push({
+        start: localStart.startOf("month").format("DD/MM/yyyy"),
+        end: localEnd.format("DD/MM/yyyy"),
+      });
+      localStart.add(1, "month");
+    } else {
+      months.push({
+        start: localStart.startOf("month").format("DD/MM/yyyy"),
+        end: localStart.endOf("month").format("DD/MM/yyyy"),
+      });
+      localStart.add(1, "month");
+    }
   }
 
   return months;
@@ -29,46 +54,120 @@ const Main = ({ token }) => {
   const [selected, setSelected] = useState({ value: "buy", label: "Mua" });
   const [range, setRange] = useState([]);
   const [results, setResults] = useState([]);
+  const [isEnable, setIsEnable] = useState(false);
 
-  //   useEffect(() => {
-  //     if (start && end) {
-  //       console.log(getMonthsInRange(moment(start), moment(end)));
-  //       getMonthsInRange(moment(start), moment(end)).map((item) => {
-  //         console.log(moment().month(item).startOf("month"));
-  //         if (moment(start).month() + 1 == item) {
-  //           setRange((pre) => [
-  //             ...pre,
-  //             {
-  //               start: moment(start).format("DD/MM/yyyy"),
-  //               end: moment(start).endOf("month").format("DD/MM/yyyy"),
-  //             },
-  //           ]);
-  //         } else if (moment(end).month() + 1 == item) {
-  //           setRange((pre) => [
-  //             ...pre,
-  //             {
-  //               start: moment().month(item).startOf("month").format("DD/MM/yyyy"),
-  //               end: moment(end).format("DD/MM/yyyy"),
-  //             },
-  //           ]);
-  //         }
-  //       });
-  //     }
-  //   }, [start, end]);
+  // const { data, isLoading } = useQuery({
+  //   queryKey: ["search", selected.value, start, end],
+  //   queryFn: () =>
+  //     fetchAllPages(
+  //       selected.value,
+  //       {
+  //         start: `${moment(start).format("DD/MM/yyyy")}T00:00:00`,
+  //         end: `${moment(end).format("DD/MM/yyyy")}T23:59:59`,
+  //       },
+  //       token
+  //     ),
+  //   enabled: isEnable,
+  // });
+  const dataQueries = useQueries({
+    queries: getMonthsInRange(moment(start), moment(end)).map((item) => ({
+      queryKey: ["search", selected.value, item],
+      queryFn: () =>
+        fetchAllPages(
+          selected.value,
+          {
+            start: `${item.start}T00:00:00`,
+            end: `${item.end}T23:59:59`,
+          },
+          token
+        ),
+      enabled: isEnable,
+    })),
+  });
 
-  //   console.log(range);
+  // console.log(getMonthsInRange(moment(start), moment(end)));
+
+  // useEffect(() => {
+  //   if (start && end) {
+  //     console.log(getMonthsInRange(moment(start), moment(end)));
+  //   }
+  // }, [start, end]);
+
+  useEffect(() => {
+    if (dataQueries.length > 0 && dataQueries.every((item) => item.isSuccess)) {
+      setIsEnable(false);
+    }
+  }, [dataQueries]);
+
+  const exportExcel = async () => {
+    const workBook = new ExcelJS.Workbook();
+    const workSheet = workBook.addWorksheet("data");
+    workSheet.addRow([""]);
+    workSheet.addRow([""]);
+    workSheet.addRow(["DANH SÁCH HOÁ ĐƠN"]);
+    // workSheet.getCell('A3').style({})
+    workSheet.mergeCells("A3", "Q3");
+    workSheet.addRow([
+      `Từ ngày ${moment(start).format("DD/MM/yyyy")} đến ngày ${moment(
+        end
+      ).format("DD/MM/yyyy")}`,
+    ]);
+    workSheet.mergeCells("A4", "Q4");
+    workSheet.addRow([
+      "STT",
+      "Ký hiệu mẫu số",
+      "Ký hiệu hoá đơn",
+      "Số hoá đơn",
+      "Ngày lập",
+      `${
+        selected.value === "sold"
+          ? "MST người mua/MST người nhận hàng"
+          : "MST người bán/MST người xuất hàng"
+      }`,
+      `${
+        selected.value === "sold"
+          ? "Tên người mua/Tên người nhận hàng"
+          : "Tên người bán/Tên người xuất hàng"
+      }`,
+
+      "Tổng tiền chưa thuế",
+      "Tổng tiền thuế",
+      "Tổng tiền chiết khấu thương mại",
+      "Tổng tiền phí",
+      "Tổng tiền thanh toán",
+      "Đơn vị tiền tệ",
+      "Tỷ giá",
+      "Trạng thái hóa đơn",
+      "Kết quả kiểm tra hóa đơn",
+    ]);
+    dataQueries
+      .reduce((total, item) => [...total, ...item.data], [])
+      .forEach((item, index) => {
+        workSheet.addRow([
+          index + 1,
+          item.khmshdon,
+          item.khhdon,
+          item.shdon,
+          item.ntao.split("T")[0].split("-").reverse().join("/"),
+          selected.value === "buy" ? item.nbmst : item.nmmst,
+          selected.value === "buy" ? item.nbten : item.nmten,
+          // selected.value === "buy" ? item.nbdchi : item.nmdchi,
+          item.tgtcthue,
+          item.tgtthue,
+          item.tgtkhac,
+          item.tgtphi,
+          item.tgtttbso,
+          item.dvtte,
+          item.tgia,
+        ]);
+      });
+
+    const buf = await workBook.xlsx.writeBuffer();
+    saveAs(new Blob([buf]), `data.xlsx`);
+  };
 
   const handleOnClick = async () => {
-    const res = await apiSearch(
-      selected.value,
-      {
-        start: `${moment(start).format("DD/MM/yyyy")}T00:00:00`,
-        end: `${moment(end).format("DD/MM/yyyy")}T23:59:59`,
-      },
-      token
-    );
-
-    console.log(res);
+    setIsEnable(true);
   };
 
   return (
@@ -98,10 +197,24 @@ const Main = ({ token }) => {
       <Button
         className="w-fit"
         color="primary"
-        isDisabled={!start || !end}
+        isLoading={dataQueries.some((item) => item.isLoading)}
+        isDisabled={
+          !start || !end || dataQueries.some((item) => item.isLoading)
+        }
         onPress={handleOnClick}
       >
         Tìm kiếm
+      </Button>
+      <Button
+        className="w-fit"
+        color="primary"
+        isDisabled={
+          dataQueries.length === 0 ||
+          dataQueries.every((item) => !item.isSuccess)
+        }
+        onPress={() => exportExcel()}
+      >
+        Xuất Excel
       </Button>
     </div>
   );

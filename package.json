@@ -11,8 +11,11 @@
   "dependencies": {
     "@nextui-org/button": "^2.2.7",
     "@nextui-org/react": "^2.6.8",
+    "@nextui-org/spinner": "^2.2.4",
     "@tanstack/react-query": "^5.62.8",
     "axios": "^1.7.9",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "framer-motion": "^11.15.0",
     "https": "^1.0.0",
     "moment": "^2.30.1",

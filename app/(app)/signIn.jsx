@@ -19,7 +19,6 @@ const SignIn = ({ setToken, captchaData }) => {
 
   return (
     <div className="flex justify-center h-[100vh] w-[100vw] items-center">
-      {" "}
       <div className="w-80 rounded-lg shadow h-auto p-6 bg-white relative overflow-hidden">
         <div className="flex flex-col justify-center items-center space-y-2">
           <h2 className="text-2xl font-medium text-slate-700">Đăng nhập</h2>

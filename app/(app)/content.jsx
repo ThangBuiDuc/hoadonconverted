@@ -1,8 +1,8 @@
 "use client";
-
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import SignIn from "./signIn";
-import Main from "./main";
+const Main = dynamic(() => import("./main"), { ssr: false });
 
 const Content = ({ captchaData }) => {
   const [token, setToken] = useState(
@@ -10,13 +10,13 @@ const Content = ({ captchaData }) => {
   );
   //   console.log(captchaData);
   return (
-    <>
+    <div>
       {token ? (
         <Main token={token} />
       ) : (
         <SignIn captchaData={captchaData} setToken={setToken} />
       )}
-    </>
+    </div>
   );
 };
 
