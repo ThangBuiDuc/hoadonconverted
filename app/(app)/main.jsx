@@ -85,7 +85,7 @@ const Main = ({ token }) => {
     })),
   });
 
-  // console.log(getMonthsInRange(moment(start), moment(end)));
+  console.log(dataQueries);
 
   // useEffect(() => {
   //   if (start && end) {
@@ -101,7 +101,7 @@ const Main = ({ token }) => {
 
   const exportExcel = async () => {
     const workBook = new ExcelJS.Workbook();
-    const workSheet = workBook.addWorksheet("data");
+    const workSheet = workBook.addWorksheet("hoadon");
     workSheet.addRow([""]);
     workSheet.addRow([""]);
     workSheet.addRow(["DANH SÁCH HOÁ ĐƠN"]);
@@ -160,6 +160,77 @@ const Main = ({ token }) => {
           item.dvtte,
           item.tgia,
         ]);
+      });
+
+    const sheet = workBook.addWorksheet("chitiethoadon");
+    sheet.addRow([
+      "Ký hiệu hoá đơn",
+      "Số hoá đơn",
+      "Ngày lập hoá đơn",
+      "Đơn vị tiền tệ",
+      "Tỷ giá",
+      "Tên nhà cung cấp",
+      "Mã số thuế người bán",
+      "Ngày ký số người bán",
+      "Mã CQT",
+      "Ngày cấp mã CQT",
+      "Tên người mua",
+      "Mã số thuế người mua",
+      "Số thứ tự",
+      "Mã HHDV",
+      "Tên HHDV",
+      "Đơn vị tính",
+      "Số lượng",
+      "Đơn giá",
+      "Tỷ lệ chiết khấu",
+      "Số tiền chiết khấu",
+      "Tổng tiền",
+      "Thuế suất",
+      "Tiền thuế",
+      "Thành tiền",
+    ]);
+    dataQueries
+      .reduce((total, item) => [...total, ...item.data], [])
+      .reduce((total, item) => [...total, item.detailInvoices], [])
+      .forEach((item) => {
+        let ttchung = [
+          `${item.khmshdon}${item.khhdon}`,
+          item.shdon,
+          item.ntao.split("T")[0].split("-").reverse().join("/"),
+          item.dvtte,
+          item.tgia,
+          item.nbten,
+          item.nbmst,
+          JSON.parse(item.nbcks)
+            .SigningTime.split("T")[0]
+            .split("-")
+            .reverse()
+            .join("/"),
+          item.cqt,
+          "",
+          item.nmten,
+          item.nmmst,
+        ];
+
+        item.hdhhdvu.forEach((el) => {
+          sheet.addRow([
+            ...ttchung,
+            el.stt,
+            el?.mhhdvu,
+            el.ten,
+            el.dvtinh,
+            el.sluong,
+            el.dgia,
+            el.tlckhau,
+            el.stckhau,
+            el.thtien,
+            el.tsuat,
+            el.ttkhac.find((element) => element.ttruong === "VATAmount").dlieu,
+            parseFloat(
+              el.ttkhac.find((element) => element.ttruong === "VATAmount").dlieu
+            ) + parseFloat(el.thtien),
+          ]);
+        });
       });
 
     const buf = await workBook.xlsx.writeBuffer();

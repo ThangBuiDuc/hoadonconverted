@@ -61,6 +61,29 @@ export const apiSearch = async (type, data, token) => {
   return res.data;
 };
 
+export const apiDetailInvoices = async (data, token) => {
+  const agent = new https.Agent({
+    rejectUnauthorized: false, // Disable SSL certificate verification
+  });
+
+  //   const res = await axios.get(process.env.NEXT_PUBLIC_API_GET_CAPTCHA, {
+  //     httpsAgent: agent,
+  //   });
+
+  //   console.log(process.env.NEXT_PUBLIC_API_GET_CAPTCHA);
+  const res = await axios({
+    url: `${process.env.NEXT_PUBLIC_API_SEARCH}/detail?nbmst=${data.nbmst}&khhdon=${data.khhdon}&shdon=${data.shdon}&khmshdon=${data.khmshdon}`,
+    method: "GET",
+    headers: {
+      "content-type": "Application/json",
+      Authorization: "Bearer " + token,
+    },
+    httpsAgent: agent,
+  });
+
+  return res.data;
+};
+
 export async function fetchAllPages(type, data, token) {
   const agent = new https.Agent({
     rejectUnauthorized: false, // Disable SSL certificate verification
@@ -86,10 +109,22 @@ export async function fetchAllPages(type, data, token) {
         httpsAgent: agent,
       });
 
-      const pageData = response.data;
+      const pageData = response.data.datas;
+
+      const processedItems = await Promise.all(
+        pageData.map(async (item) => {
+          try {
+            const processResponse = await apiDetailInvoices(item, token);
+            return { ...item, detailInvoices: processResponse };
+          } catch (error) {
+            console.error("Error processing item:", item.id, error.message);
+            return { ...item, additionalData: null }; // Fallback in case of error
+          }
+        })
+      );
 
       // Append current page data to allData
-      allData.push(...pageData.datas); // Adjust `items` to match the API's data structure
+      allData.push(...processedItems); // Adjust `items` to match the API's data structure
 
       // Check if there's more data
       state = pageData.state;
