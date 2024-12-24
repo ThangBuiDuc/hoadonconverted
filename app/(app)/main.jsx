@@ -85,7 +85,7 @@ const Main = ({ token }) => {
     })),
   });
 
-  console.log(dataQueries);
+  // console.log(dataQueries);
 
   // useEffect(() => {
   //   if (start && end) {
@@ -101,140 +101,212 @@ const Main = ({ token }) => {
 
   const exportExcel = async () => {
     const workBook = new ExcelJS.Workbook();
-    const workSheet = workBook.addWorksheet("hoadon");
-    workSheet.addRow([""]);
-    workSheet.addRow([""]);
-    workSheet.addRow(["DANH SÁCH HOÁ ĐƠN"]);
-    // workSheet.getCell('A3').style({})
-    workSheet.mergeCells("A3", "Q3");
-    workSheet.addRow([
-      `Từ ngày ${moment(start).format("DD/MM/yyyy")} đến ngày ${moment(
-        end
-      ).format("DD/MM/yyyy")}`,
-    ]);
-    workSheet.mergeCells("A4", "Q4");
-    workSheet.addRow([
-      "STT",
-      "Ký hiệu mẫu số",
-      "Ký hiệu hoá đơn",
-      "Số hoá đơn",
-      "Ngày lập",
-      `${
-        selected.value === "sold"
-          ? "MST người mua/MST người nhận hàng"
-          : "MST người bán/MST người xuất hàng"
-      }`,
-      `${
-        selected.value === "sold"
-          ? "Tên người mua/Tên người nhận hàng"
-          : "Tên người bán/Tên người xuất hàng"
-      }`,
+    // const workSheet = workBook.addWorksheet("hoadon");
+    // workSheet.addRow([""]);
+    // workSheet.addRow([""]);
+    // workSheet.addRow(["DANH SÁCH HOÁ ĐƠN"]);
+    // // workSheet.getCell('A3').style({})
+    // workSheet.mergeCells("A3", "Q3");
+    // workSheet.addRow([
+    //   `Từ ngày ${moment(start).format("DD/MM/yyyy")} đến ngày ${moment(
+    //     end
+    //   ).format("DD/MM/yyyy")}`,
+    // ]);
+    // workSheet.mergeCells("A4", "Q4");
+    // workSheet.addRow([
+    //   "STT",
+    //   "Ký hiệu mẫu số",
+    //   "Ký hiệu hoá đơn",
+    //   "Số hoá đơn",
+    //   "Ngày lập",
+    //   `${
+    //     selected.value === "sold"
+    //       ? "MST người mua/MST người nhận hàng"
+    //       : "MST người bán/MST người xuất hàng"
+    //   }`,
+    //   `${
+    //     selected.value === "sold"
+    //       ? "Tên người mua/Tên người nhận hàng"
+    //       : "Tên người bán/Tên người xuất hàng"
+    //   }`,
 
-      "Tổng tiền chưa thuế",
-      "Tổng tiền thuế",
-      "Tổng tiền chiết khấu thương mại",
-      "Tổng tiền phí",
-      "Tổng tiền thanh toán",
-      "Đơn vị tiền tệ",
-      "Tỷ giá",
-      "Trạng thái hóa đơn",
-      "Kết quả kiểm tra hóa đơn",
-    ]);
-    dataQueries
-      .reduce((total, item) => [...total, ...item.data], [])
-      .forEach((item, index) => {
-        workSheet.addRow([
-          index + 1,
-          item.khmshdon,
-          item.khhdon,
-          item.shdon,
-          item.ntao.split("T")[0].split("-").reverse().join("/"),
-          selected.value === "buy" ? item.nbmst : item.nmmst,
-          selected.value === "buy" ? item.nbten : item.nmten,
-          // selected.value === "buy" ? item.nbdchi : item.nmdchi,
-          item.tgtcthue,
-          item.tgtthue,
-          item.tgtkhac,
-          item.tgtphi,
-          item.tgtttbso,
-          item.dvtte,
-          item.tgia,
-        ]);
-      });
+    //   "Tổng tiền chưa thuế",
+    //   "Tổng tiền thuế",
+    //   "Tổng tiền chiết khấu thương mại",
+    //   "Tổng tiền phí",
+    //   "Tổng tiền thanh toán",
+    //   "Đơn vị tiền tệ",
+    //   "Tỷ giá",
+    //   "Trạng thái hóa đơn",
+    //   "Kết quả kiểm tra hóa đơn",
+    // ]);
+    // dataQueries
+    //   .reduce((total, item) => [...total, ...item.data], [])
+    //   .forEach((item, index) => {
+    //     workSheet.addRow([
+    //       index + 1,
+    //       item.khmshdon,
+    //       item.khhdon,
+    //       item.shdon,
+    //       item.ntao.split("T")[0].split("-").reverse().join("/"),
+    //       selected.value === "buy" ? item.nbmst : item.nmmst,
+    //       selected.value === "buy" ? item.nbten : item.nmten,
+    //       // selected.value === "buy" ? item.nbdchi : item.nmdchi,
+    //       item.tgtcthue,
+    //       item.tgtthue,
+    //       item.tgtkhac,
+    //       item.tgtphi,
+    //       item.tgtttbso,
+    //       item.dvtte,
+    //       item.tgia,
+    //     ]);
+    //   });
 
-    const sheet = workBook.addWorksheet("chitiethoadon");
-    sheet.addRow([
-      "Ký hiệu hoá đơn",
-      "Số hoá đơn",
-      "Ngày lập hoá đơn",
-      "Đơn vị tiền tệ",
-      "Tỷ giá",
-      "Tên nhà cung cấp",
-      "Mã số thuế người bán",
-      "Ngày ký số người bán",
-      "Mã CQT",
-      "Ngày cấp mã CQT",
-      "Tên người mua",
-      "Mã số thuế người mua",
-      "Số thứ tự",
-      "Mã HHDV",
-      "Tên HHDV",
-      "Đơn vị tính",
-      "Số lượng",
-      "Đơn giá",
-      "Tỷ lệ chiết khấu",
-      "Số tiền chiết khấu",
-      "Tổng tiền",
-      "Thuế suất",
-      "Tiền thuế",
-      "Thành tiền",
-    ]);
-    dataQueries
-      .reduce((total, item) => [...total, ...item.data], [])
-      .reduce((total, item) => [...total, item.detailInvoices], [])
-      .forEach((item) => {
-        let ttchung = [
-          `${item.khmshdon}${item.khhdon}`,
-          item.shdon,
-          item.ntao.split("T")[0].split("-").reverse().join("/"),
-          item.dvtte,
-          item.tgia,
-          item.nbten,
-          item.nbmst,
-          JSON.parse(item.nbcks)
-            .SigningTime.split("T")[0]
-            .split("-")
-            .reverse()
-            .join("/"),
-          item.cqt,
-          "",
-          item.nmten,
-          item.nmmst,
-        ];
+    if (selected.value === "sold") {
+      const sheet = workBook.addWorksheet("chitiethoadon");
+      sheet.addRow([
+        "Ngày hoạch toán (*)",
+        "Ngày chứng từ (*)",
+        "Số chứng từ (*)",
+        "Mẫu số hợp đồng",
+        "Ký hiệu hoá đơn",
+        "Số hoá đơn",
+        "Ngày hoá đơn",
+        "Mã khách hàng",
+        "Tên khách hàng",
+        "Địa chỉ",
+        "Mã số thuế",
+        "Diễn giải",
+        "Mã hàng (*)",
+        "Tên hàng",
+        "TK Tiền/Chi phí/Nợ (*)",
+        "Hình thức thanh toán",
+        "ĐVT",
+        "Số lượng",
+        "Đơn giá",
+        "Thành tiền",
+        "% thuế GTGT",
+        "Tiền thuế GTGT",
+        "TK thuế GTGT",
+        "Tiền tệ",
+        "Tỷ giá",
+        "Mã Cơ Quan Thuế",
+        "CCCD",
+      ]);
+      dataQueries
+        .reduce((total, item) => [...total, ...item.data], [])
+        .reduce((total, item) => [...total, item.detailInvoices], [])
+        .forEach((item) => {
+          let ttchung = [
+            "",
+            "",
+            "",
+            `${item.khmshdon}${item.khhdon}`,
+            `${item.khhdon}`,
+            item.shdon,
+            item.ntao.split("T")[0].split("-").reverse().join("/"),
+            "",
+            item.nmten,
+            item.nmdchi,
+            item.nmmst,
+          ];
 
-        item.hdhhdvu.forEach((el) => {
-          sheet.addRow([
-            ...ttchung,
-            el.stt,
-            el?.mhhdvu,
-            el.ten,
-            el.dvtinh,
-            el.sluong,
-            el.dgia,
-            el.tlckhau,
-            el.stckhau,
-            el.thtien,
-            el.tsuat,
-            el.ttkhac.find((element) => element.ttruong === "VATAmount").dlieu,
-            parseFloat(
-              el.ttkhac.find((element) => element.ttruong === "VATAmount").dlieu
-            ) + parseFloat(el.thtien),
-          ]);
+          item.hdhhdvu.forEach((el) => {
+            sheet.addRow([
+              ...ttchung,
+              el.ten,
+              el?.mhhdvu,
+              el.ten,
+              "",
+              item.thtttoan,
+              el.dvtinh,
+              el.sluong,
+              el.dgia,
+              el.thtien,
+              el.ltsuat,
+              parseInt(el.thtien) *
+                (parseInt(el.ltsuat.replace("%", "")) / 100),
+              "",
+              item.dvtte,
+              item.tgia,
+              item.mhdon,
+            ]);
+          });
         });
-      });
 
-    const buf = await workBook.xlsx.writeBuffer();
-    saveAs(new Blob([buf]), `data.xlsx`);
+      const buf = await workBook.xlsx.writeBuffer();
+      saveAs(new Blob([buf]), `data.xlsx`);
+    } else {
+      const sheet = workBook.addWorksheet("chitiethoadon");
+      sheet.addRow([
+        "Mẫu số",
+        "KH hoá đơn",
+        "Số hoá đơn",
+        "Ngày hoá đơn",
+        "MST người bán",
+        "Tên người bán",
+        "Địa chỉ người bán",
+        "Mã hàng",
+        "Tên hàng",
+        "Đơn vị tính",
+        "Số lượng",
+        "Đơn giá",
+        "Tiền hàng chưa thuế",
+        "Loại thuế suất GTGT",
+        "Thuế suất",
+        "Tiền thuế GTGT",
+        "Tổng tiền",
+        "Tổng tiền chiết khấu",
+        "Tổng tiền phí",
+        "Đơn vị tiền tệ",
+        "Tỷ giá",
+        "Ghi chú",
+      ]);
+      dataQueries
+        .reduce((total, item) => [...total, ...item.data], [])
+        .reduce((total, item) => [...total, item.detailInvoices], [])
+        .forEach((item) => {
+          let ttchung = [
+            `${item.khmshdon}`,
+            `${item.khhdon}`,
+            item.shdon,
+            item.ntao.split("T")[0].split("-").reverse().join("/"),
+            item.nbmst,
+            item.nbten,
+            item.nbdchi,
+          ];
+
+          item.hdhhdvu.forEach((el) => {
+            sheet.addRow([
+              ...ttchung,
+              el?.mhhdvu,
+              el.ten,
+              el.dvtinh,
+              el.sluong,
+              el.dgia,
+              el.thtien,
+              el.ltsuat,
+              el.ltsuat ? el.ltsuat.replace("%", "") : "",
+              el.ltsuat
+                ? parseInt(el.thtien) *
+                  (parseInt(el.ltsuat.replace("%", "")) / 100)
+                : 0,
+              el.ltsuat
+                ? parseInt(el.thtien) +
+                  parseInt(el.thtien) *
+                    (parseInt(el.ltsuat.replace("%", "")) / 100)
+                : el.thtien,
+              "",
+              "",
+              item.dvtte,
+              item.tgia,
+            ]);
+          });
+        });
+
+      const buf = await workBook.xlsx.writeBuffer();
+      saveAs(new Blob([buf]), `data.xlsx`);
+    }
   };
 
   const handleOnClick = async () => {
@@ -281,7 +353,8 @@ const Main = ({ token }) => {
         color="primary"
         isDisabled={
           dataQueries.length === 0 ||
-          dataQueries.every((item) => !item.isSuccess)
+          dataQueries.every((item) => !item.isSuccess) ||
+          dataQueries.some((item) => item.isLoading)
         }
         onPress={() => exportExcel()}
       >

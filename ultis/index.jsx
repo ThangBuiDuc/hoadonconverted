@@ -91,9 +91,16 @@ export async function fetchAllPages(type, data, token) {
   const allData = [];
   let page = 1;
   let state = true;
+  // Helper function for delay
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  // Helper function to generate a random delay
+  const randomDelay = (minMs, maxMs) =>
+    Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 
   while (state) {
     try {
+      await delay(page * 2000);
       // Send GET request with axios, including pagination details
       const response = await axios({
         url: `${process.env.NEXT_PUBLIC_API_SEARCH}/${
@@ -112,8 +119,9 @@ export async function fetchAllPages(type, data, token) {
       const pageData = response.data.datas;
 
       const processedItems = await Promise.all(
-        pageData.map(async (item) => {
+        pageData.map(async (item, index) => {
           try {
+            await delay(index * 2000);
             const processResponse = await apiDetailInvoices(item, token);
             return { ...item, detailInvoices: processResponse };
           } catch (error) {
