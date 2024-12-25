@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 import { Button } from "@nextui-org/button";
 import { fetchAllPages } from "@/ultis";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
@@ -49,6 +49,7 @@ function getMonthsInRange(start, end) {
 }
 
 const Main = ({ token }) => {
+  const queryClient = useQueryClient();
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [selected, setSelected] = useState({ value: "buy", label: "Mua" });
@@ -70,19 +71,32 @@ const Main = ({ token }) => {
   //   enabled: isEnable,
   // });
   const dataQueries = useQueries({
-    queries: getMonthsInRange(moment(start), moment(end)).map((item) => ({
-      queryKey: ["search", selected.value, item],
-      queryFn: () =>
-        fetchAllPages(
-          selected.value,
-          {
-            start: `${item.start}T00:00:00`,
-            end: `${item.end}T23:59:59`,
-          },
-          token
-        ),
-      enabled: isEnable,
-    })),
+    queries: getMonthsInRange(moment(start), moment(end)).map((item, index) => {
+      const dependsOn =
+        index > 0
+          ? queryClient.getQueryState([
+              "search",
+              selected.value,
+              getMonthsInRange(moment(start), moment(end))[index - 1],
+            ])?.status === "success"
+          : null;
+      return {
+        queryKey: ["search", selected.value, item],
+        queryFn: () =>
+          fetchAllPages(
+            selected.value,
+            {
+              start: `${item.start}T00:00:00`,
+              end: `${item.end}T23:59:59`,
+            },
+            token
+          ),
+        enabled: index === 0 ? isEnable : !!dependsOn,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+      };
+    }),
   });
 
   // console.log(dataQueries);
@@ -252,7 +266,7 @@ const Main = ({ token }) => {
         "Số lượng",
         "Đơn giá",
         "Tiền hàng chưa thuế",
-        "Loại thuế suất GTGT",
+        // "Loại thuế suất GTGT",
         "Thuế suất",
         "Tiền thuế GTGT",
         "Tổng tiền",
@@ -285,7 +299,7 @@ const Main = ({ token }) => {
               el.sluong,
               el.dgia,
               el.thtien,
-              el.ltsuat,
+              // el.ltsuat,
               el.ltsuat ? el.ltsuat.replace("%", "") : "",
               el.ltsuat
                 ? parseInt(el.thtien) *
@@ -314,18 +328,20 @@ const Main = ({ token }) => {
   };
 
   return (
-    <div className="flex flex-col p-4 gap-2">
+    <div className=" w-[100vw] h-[100vh] align-middle flex flex-col p-4 gap-2 justify-center items-center">
       <div className="flex gap-2">
         <h6>Từ ngày:</h6>
         <input
+          className="boder border-1"
           type="date"
           value={start}
           onChange={(e) => setStart(e.target.value)}
         />
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 ">
         <h6>Đến ngày:</h6>
         <input
+          className="boder border-1"
           type="date"
           value={end}
           onChange={(e) => setEnd(e.target.value)}
@@ -337,29 +353,31 @@ const Main = ({ token }) => {
         onChange={setSelected}
         className="w-[200px]"
       />
-      <Button
-        className="w-fit"
-        color="primary"
-        isLoading={dataQueries.some((item) => item.isLoading)}
-        isDisabled={
-          !start || !end || dataQueries.some((item) => item.isLoading)
-        }
-        onPress={handleOnClick}
-      >
-        Tìm kiếm
-      </Button>
-      <Button
-        className="w-fit"
-        color="primary"
-        isDisabled={
-          dataQueries.length === 0 ||
-          dataQueries.every((item) => !item.isSuccess) ||
-          dataQueries.some((item) => item.isLoading)
-        }
-        onPress={() => exportExcel()}
-      >
-        Xuất Excel
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          className="w-fit"
+          color="primary"
+          isLoading={dataQueries.some((item) => item.isLoading)}
+          isDisabled={
+            !start || !end || dataQueries.some((item) => item.isLoading)
+          }
+          onPress={handleOnClick}
+        >
+          Tìm kiếm
+        </Button>
+        <Button
+          className="w-fit"
+          color="primary"
+          isDisabled={
+            dataQueries.length === 0 ||
+            dataQueries.every((item) => !item.isSuccess) ||
+            dataQueries.some((item) => item.isLoading)
+          }
+          onPress={() => exportExcel()}
+        >
+          Xuất Excel
+        </Button>
+      </div>
     </div>
   );
 };

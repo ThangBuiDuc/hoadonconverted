@@ -5,13 +5,55 @@ import SignIn from "./signIn";
 const Main = dynamic(() => import("./main"), { ssr: false });
 
 const Content = ({ captchaData }) => {
-  const [token, setToken] = useState(
-    "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMjAwOTA2MDQ5IiwidHlwZSI6MiwiZXhwIjoxNzM1MTM2NDQzLCJpYXQiOjE3MzUwNTAwNDN9.Wrg-CeLYjQBNpzmUMput3wreQfRhQFk0AQ4McwcpucDES40ypKwKDugOZ7Fy2syR4Dq2Ykk1bwUE3Gv_Gi9CZA"
-  );
+  const [key, SetKey] = useState("");
+  const [isVerify, setIsVerify] = useState(false);
+  const [token, setToken] = useState(null);
+
+  const verify = (e) => {
+    e.preventDefault();
+    if (key === process.env.NEXT_PUBLIC_KEY) {
+      setIsVerify(true);
+    }
+  };
+
   //   console.log(captchaData);
   return (
     <div>
-      {token ? (
+      {!isVerify ? (
+        <div className="flex justify-center h-[100vh] w-[100vw] items-center">
+          <div className="w-80 rounded-lg shadow h-auto p-6 bg-white relative overflow-hidden">
+            <div className="flex flex-col justify-center items-center space-y-2">
+              <h2 className="text-2xl font-medium text-slate-700">
+                Nhập Mã Khoá
+              </h2>
+            </div>
+            <form
+              className="w-full mt-4 space-y-3 justify-center flex flex-col"
+              onSubmit={verify}
+            >
+              <div>
+                <input
+                  value={key}
+                  onChange={(e) => {
+                    SetKey(e.target.value);
+                  }}
+                  className="outline-none border-2 rounded-md px-2 py-1 text-slate-500 w-full focus:border-blue-300"
+                  placeholder="Mã khoá"
+                  type="text"
+                />
+              </div>
+              <button
+                className="w-full justify-center py-1 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 rounded-md text-white ring-2"
+                id="login"
+                name="login"
+                type="submit"
+              >
+                Nhập
+              </button>
+            </form>
+          </div>
+        </div>
+      ) : token ? (
         <Main token={token} />
       ) : (
         <SignIn captchaData={captchaData} setToken={setToken} />
