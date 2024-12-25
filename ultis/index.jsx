@@ -2,13 +2,11 @@ import axios from "axios";
 import https from "https";
 
 export const getCaptcha = async () => {
-  const agent = new https.Agent({
-    rejectUnauthorized: false, // Disable SSL certificate verification
-  });
+  // const agent = new https.Agent({
+  //   rejectUnauthorized: false, // Disable SSL certificate verification
+  // });
 
-  const res = await axios.get(process.env.NEXT_PUBLIC_API_GET_CAPTCHA, {
-    httpsAgent: agent,
-  });
+  const res = await axios.get(process.env.NEXT_PUBLIC_API_GET_CAPTCHA);
   //   console.log(process.env.NEXT_PUBLIC_API_GET_CAPTCHA);
   //   const res = await axios({
   //     url: process.env.NEXT_PUBLIC_API_GET_CAPTCHA,
@@ -35,9 +33,9 @@ export const apiLogIn = async (data) => {
 };
 
 export const apiSearch = async (type, data, token) => {
-  const agent = new https.Agent({
-    rejectUnauthorized: false, // Disable SSL certificate verification
-  });
+  // const agent = new https.Agent({
+  //   rejectUnauthorized: false, // Disable SSL certificate verification
+  // });
 
   //   const res = await axios.get(process.env.NEXT_PUBLIC_API_GET_CAPTCHA, {
   //     httpsAgent: agent,
@@ -55,16 +53,16 @@ export const apiSearch = async (type, data, token) => {
       "content-type": "Application/json",
       Authorization: "Bearer " + token,
     },
-    httpsAgent: agent,
+    // httpsAgent: agent,
   });
 
   return res.data;
 };
 
 export const apiDetailInvoices = async (data, token) => {
-  const agent = new https.Agent({
-    rejectUnauthorized: false, // Disable SSL certificate verification
-  });
+  // const agent = new https.Agent({
+  //   rejectUnauthorized: false, // Disable SSL certificate verification
+  // });
 
   //   const res = await axios.get(process.env.NEXT_PUBLIC_API_GET_CAPTCHA, {
   //     httpsAgent: agent,
@@ -78,7 +76,7 @@ export const apiDetailInvoices = async (data, token) => {
       "content-type": "Application/json",
       Authorization: "Bearer " + token,
     },
-    httpsAgent: agent,
+    // httpsAgent: agent,
   });
 
   return res.data;
