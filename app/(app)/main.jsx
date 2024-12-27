@@ -85,7 +85,7 @@ const Main = ({ token }) => {
   // const [results, setResults] = useState([]);
   const [isEnable, setIsEnable] = useState(false);
 
-  // console.log(selected1.value);
+  console.log(selected1.value);
 
   // const { data, isLoading } = useQuery({
   //   queryKey: ["search", selected.value, start, end],
@@ -141,6 +141,8 @@ const Main = ({ token }) => {
   });
 
   console.log(dataQueries);
+
+  // console.log(dataQueries);
 
   // useEffect(() => {
   //   if (start && end) {
