@@ -1,5 +1,6 @@
 import { getCaptcha } from "@/ultis";
 import Content from "./(app)/content";
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const captcha = await getCaptcha();

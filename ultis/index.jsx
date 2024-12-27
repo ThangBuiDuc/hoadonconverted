@@ -1,5 +1,6 @@
 import axios from "axios";
 import https from "https";
+export const dynamic = "force-dynamic";
 
 export const getCaptcha = async () => {
   // const agent = new https.Agent({
@@ -105,7 +106,9 @@ export async function fetchAllPages(type, data, token) {
           type === "buy" ? "purchase" : "sold"
         }?sort=tdlap:desc,khmshdon:asc,shdon:desc&size=50&search=tdlap=ge=${
           data.start
-        };tdlap=le=${data.end};ttxly==5${page > 1 ? `&state=${state}` : ""}`,
+        };tdlap=le=${data.end}${data.status === 0 ? "" : ";tthai==1"}${
+          data.result === 99 ? "" : ";txly==0"
+        }${page > 1 ? `&state=${state}` : ""}`,
         method: "GET",
         headers: {
           "content-type": "Application/json",
