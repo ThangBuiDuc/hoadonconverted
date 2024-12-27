@@ -14,6 +14,32 @@ const options = [
   { value: "sold", label: "Bán" },
 ];
 
+const options1 = [
+  { value: 0, label: "Tất cả" },
+  { value: 1, label: "Hoá đơn mới" },
+  { value: 2, label: "Hoá đơn thay thế" },
+  { value: 3, label: "Hoá đơn điều chỉnh" },
+  { value: 4, label: "Hoá đơn đã bị thay thế" },
+  { value: 5, label: "Hoá đơn đã bị điều chỉnh" },
+  { value: 6, label: "Hoá đơn đã bị huỷ" },
+];
+
+const options2 = [
+  { value: 99, label: "Tất cả" },
+  { value: 0, label: "Tổng cục thuế đã nhận" },
+  { value: 1, label: "Đang tiến hành kiểm tra điều kiện cấp mã" },
+  { value: 2, label: "CQT từ chối hoá đơn theo từng lần phát sinh" },
+  { value: 3, label: "Hoá đơn đủ điều kiện cấp mã" },
+  { value: 4, label: "Hoá đơn đủ không đủ điều kiện cấp mã" },
+  { value: 5, label: "Đã cấp mã hoá đơn" },
+  { value: 6, label: "Tổng cục thuế đã nhận không mã" },
+  { value: 7, label: "Đã kiểm tra định kỳ HĐĐT không có mã" },
+  {
+    value: 8,
+    label: "Tổng cục thuế đã nhận hoá đơn có mã khởi tạo từ máy tính tiền",
+  },
+];
+
 function getMonthsInRange(start, end) {
   let localStart = start.clone();
   let localEnd = end.clone();
@@ -53,9 +79,13 @@ const Main = ({ token }) => {
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [selected, setSelected] = useState({ value: "buy", label: "Mua" });
-  const [range, setRange] = useState([]);
-  const [results, setResults] = useState([]);
+  const [selected1, setSelected1] = useState({ value: 0, label: "Tất cả" });
+  const [selected2, setSelected2] = useState({ value: 99, label: "Tất cả" });
+  // const [range, setRange] = useState([]);
+  // const [results, setResults] = useState([]);
   const [isEnable, setIsEnable] = useState(false);
+
+  // console.log(selected1.value);
 
   // const { data, isLoading } = useQuery({
   //   queryKey: ["search", selected.value, start, end],
@@ -70,6 +100,7 @@ const Main = ({ token }) => {
   //     ),
   //   enabled: isEnable,
   // });
+
   const dataQueries = useQueries({
     queries: getMonthsInRange(moment(start), moment(end)).map((item, index) => {
       const dependsOn =
@@ -77,21 +108,31 @@ const Main = ({ token }) => {
           ? queryClient.getQueryState([
               "search",
               selected.value,
+              selected1.value,
+              selected2.value,
               getMonthsInRange(moment(start), moment(end))[index - 1],
             ])?.status === "success"
           : null;
       return {
-        queryKey: ["search", selected.value, item],
+        queryKey: [
+          "search",
+          selected.value,
+          selected1.value,
+          selected2.value,
+          item,
+        ],
         queryFn: () =>
           fetchAllPages(
             selected.value,
             {
               start: `${item.start}T00:00:00`,
               end: `${item.end}T23:59:59`,
+              status: selected1.value,
+              result: selected2.value,
             },
             token
           ),
-        enabled: index === 0 ? isEnable : !!dependsOn,
+        enabled: index === 0 ? isEnable : !!dependsOn && isEnable,
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         refetchOnReconnect: false,
@@ -99,7 +140,7 @@ const Main = ({ token }) => {
     }),
   });
 
-  // console.log(dataQueries);
+  console.log(dataQueries);
 
   // useEffect(() => {
   //   if (start && end) {
@@ -206,6 +247,8 @@ const Main = ({ token }) => {
         "Tỷ giá",
         "Mã Cơ Quan Thuế",
         "CCCD",
+        "Trạng thái hoá đơn",
+        "Kết quả kiểm tra",
       ]);
       dataQueries
         .reduce((total, item) => [...total, ...item.data], [])
@@ -244,6 +287,9 @@ const Main = ({ token }) => {
               item.dvtte,
               item.tgia,
               item.mhdon,
+              "",
+              options1.find((el1) => el1.value === item.tthai).label,
+              options2.find((el1) => el1.value === item.ttxly).label,
             ]);
           });
         });
@@ -275,6 +321,8 @@ const Main = ({ token }) => {
         "Đơn vị tiền tệ",
         "Tỷ giá",
         "Ghi chú",
+        "Trạng thái hoá đơn",
+        "Kết quả kiểm tra",
       ]);
       dataQueries
         .reduce((total, item) => [...total, ...item.data], [])
@@ -314,6 +362,9 @@ const Main = ({ token }) => {
               "",
               item.dvtte,
               item.tgia,
+              "",
+              options1.find((el1) => el1.value === item.tthai).label,
+              options2.find((el1) => el1.value === item.ttxly).label,
             ]);
           });
         });
@@ -347,12 +398,35 @@ const Main = ({ token }) => {
           onChange={(e) => setEnd(e.target.value)}
         />
       </div>
-      <Select
-        options={options}
-        value={selected}
-        onChange={setSelected}
-        className="w-[200px]"
-      />
+      <div className="flex gap-2  items-center">
+        <h6>Hoá đơn điện tử:</h6>
+        <Select
+          options={options}
+          value={selected}
+          onChange={setSelected}
+          className="w-[200px]"
+        />
+      </div>
+      <div className="flex gap-2 items-center">
+        <h6>Trạng thái hoá đơn:</h6>
+        <Select
+          options={options1}
+          value={selected1}
+          onChange={setSelected1}
+          className="w-[200px]"
+        />
+      </div>
+
+      <div className="flex gap-2 items-center">
+        <h6>Kết quả kiểm tra:</h6>
+        <Select
+          options={options2}
+          value={selected2}
+          onChange={setSelected2}
+          className="w-[200px]"
+        />
+      </div>
+
       <div className="flex gap-2">
         <Button
           className="w-fit"
