@@ -110,7 +110,7 @@ export async function fetchAllPages(type, data, token) {
           data.start
         };tdlap=le=${data.end}${
           data.status === 0 ? "" : `;tthai==${data.status}`
-        }${data.result === 99 ? "" : `;txly==${data.result}`}${
+        }${data.result === 99 ? "" : `;ttxly==${data.result}`}${
           page > 1 ? `&state=${state}` : ""
         }`,
         method: "GET",

@@ -85,8 +85,6 @@ const Main = ({ token }) => {
   // const [results, setResults] = useState([]);
   const [isEnable, setIsEnable] = useState(false);
 
-  console.log(selected1.value);
-
   // const { data, isLoading } = useQuery({
   //   queryKey: ["search", selected.value, start, end],
   //   queryFn: () =>
@@ -140,8 +138,6 @@ const Main = ({ token }) => {
     }),
   });
 
-  console.log(dataQueries);
-
   // console.log(dataQueries);
 
   // useEffect(() => {
@@ -155,6 +151,17 @@ const Main = ({ token }) => {
       setIsEnable(false);
     }
   }, [dataQueries]);
+
+  useEffect(() => {
+    if (selected.value === "buy") {
+      setSelected2({ value: 5, label: "Đã cấp mã hoá đơn" });
+    } else {
+      setSelected2({
+        value: 99,
+        label: "Tất cả",
+      });
+    }
+  }, [selected.value]);
 
   const exportExcel = async () => {
     const workBook = new ExcelJS.Workbook();
@@ -260,35 +267,41 @@ const Main = ({ token }) => {
             "",
             "",
             "",
-            `${item.khmshdon}${item.khhdon}`,
-            `${item.khhdon}`,
-            item.shdon,
-            item.ntao.split("T")[0].split("-").reverse().join("/"),
+            `${item?.khmshdon}${item?.khhdon}`,
+            `${item?.khhdon}`,
+            item?.shdon,
+            item?.ntao.split("T")[0].split("-").reverse().join("/"),
             "",
-            item.nmten,
-            item.nmdchi,
-            item.nmmst,
+            item?.nmten,
+            item?.nmdchi,
+            item?.nmmst,
           ];
 
           item.hdhhdvu.forEach((el) => {
             sheet.addRow([
               ...ttchung,
-              el.ten,
+              el?.ten,
               el?.mhhdvu,
-              el.ten,
+              el?.ten,
               "",
-              item.thtttoan,
-              el.dvtinh,
-              el.sluong,
-              el.dgia,
-              el.thtien,
-              el.ltsuat,
-              parseInt(el.thtien) *
-                (parseInt(el.ltsuat.replace("%", "")) / 100),
+              item?.thtttoan,
+              el?.dvtinh,
+              el?.sluong,
+              el?.dgia,
+              el?.thtien,
+              el.ltsuat
+                ? el.ltsuat === "KCT"
+                  ? el.ltsuat
+                  : el.ltsuat.replace("%", "")
+                : "",
+              el.ltsuat !== "KCT" && el.ltsuat
+                ? parseInt(el.thtien) *
+                  (parseInt(el.ltsuat.replace("%", "")) / 100)
+                : 0,
               "",
-              item.dvtte,
-              item.tgia,
-              item.mhdon,
+              item?.dvtte,
+              item?.tgia,
+              item?.mhdon,
               "",
               options1.find((el1) => el1.value === item.tthai).label,
               options2.find((el1) => el1.value === item.ttxly).label,
@@ -331,39 +344,43 @@ const Main = ({ token }) => {
         .reduce((total, item) => [...total, item.detailInvoices], [])
         .forEach((item) => {
           let ttchung = [
-            `${item.khmshdon}`,
-            `${item.khhdon}`,
-            item.shdon,
-            item.ntao.split("T")[0].split("-").reverse().join("/"),
-            item.nbmst,
-            item.nbten,
-            item.nbdchi,
+            `${item?.khmshdon}`,
+            `${item?.khhdon}`,
+            item?.shdon,
+            item?.ntao.split("T")[0].split("-").reverse().join("/"),
+            item?.nbmst,
+            item?.nbten,
+            item?.nbdchi,
           ];
 
           item.hdhhdvu.forEach((el) => {
             sheet.addRow([
               ...ttchung,
               el?.mhhdvu,
-              el.ten,
-              el.dvtinh,
-              el.sluong,
-              el.dgia,
-              el.thtien,
+              el?.ten,
+              el?.dvtinh,
+              el?.sluong,
+              el?.dgia,
+              el?.thtien,
               // el.ltsuat,
-              el.ltsuat ? el.ltsuat.replace("%", "") : "",
               el.ltsuat
+                ? el.ltsuat === "KCT"
+                  ? el.ltsuat
+                  : el.ltsuat.replace("%", "")
+                : "",
+              el.ltsuat !== "KCT" && el.ltsuat
                 ? parseInt(el.thtien) *
                   (parseInt(el.ltsuat.replace("%", "")) / 100)
                 : 0,
-              el.ltsuat
+              el.ltsuat !== "KCT" && el.ltsuat
                 ? parseInt(el.thtien) +
                   parseInt(el.thtien) *
                     (parseInt(el.ltsuat.replace("%", "")) / 100)
                 : el.thtien,
               "",
               "",
-              item.dvtte,
-              item.tgia,
+              item?.dvtte,
+              item?.tgia,
               "",
               options1.find((el1) => el1.value === item.tthai).label,
               options2.find((el1) => el1.value === item.ttxly).label,
@@ -422,7 +439,14 @@ const Main = ({ token }) => {
       <div className="flex gap-2 items-center">
         <h6>Kết quả kiểm tra:</h6>
         <Select
-          options={options2}
+          options={
+            selected.value === "buy"
+              ? options2.filter(
+                  (item) =>
+                    item.value === 5 || item.value === 6 || item.value === 8
+                )
+              : options2
+          }
           value={selected2}
           onChange={setSelected2}
           className="w-[200px]"
