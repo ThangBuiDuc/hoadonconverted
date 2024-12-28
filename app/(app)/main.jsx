@@ -443,7 +443,10 @@ const Main = ({ token }) => {
             selected.value === "buy"
               ? options2.filter(
                   (item) =>
-                    item.value === 5 || item.value === 6 || item.value === 8
+                    item.value === 5 ||
+                    item.value === 6 ||
+                    item.value === 8 ||
+                    item.value === 99
                 )
               : options2
           }
