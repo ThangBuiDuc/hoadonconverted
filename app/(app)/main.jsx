@@ -153,78 +153,15 @@ const Main = ({ token }) => {
   }, [dataQueries]);
 
   useEffect(() => {
-    if (selected.value === "buy") {
-      setSelected2({ value: 5, label: "Đã cấp mã hoá đơn" });
-    } else {
-      setSelected2({
-        value: 99,
-        label: "Tất cả",
-      });
-    }
+    setSelected1({ value: 0, label: "Tất cả" });
+    setSelected2({
+      value: 99,
+      label: "Tất cả",
+    });
   }, [selected.value]);
 
   const exportExcel = async () => {
     const workBook = new ExcelJS.Workbook();
-    // const workSheet = workBook.addWorksheet("hoadon");
-    // workSheet.addRow([""]);
-    // workSheet.addRow([""]);
-    // workSheet.addRow(["DANH SÁCH HOÁ ĐƠN"]);
-    // // workSheet.getCell('A3').style({})
-    // workSheet.mergeCells("A3", "Q3");
-    // workSheet.addRow([
-    //   `Từ ngày ${moment(start).format("DD/MM/yyyy")} đến ngày ${moment(
-    //     end
-    //   ).format("DD/MM/yyyy")}`,
-    // ]);
-    // workSheet.mergeCells("A4", "Q4");
-    // workSheet.addRow([
-    //   "STT",
-    //   "Ký hiệu mẫu số",
-    //   "Ký hiệu hoá đơn",
-    //   "Số hoá đơn",
-    //   "Ngày lập",
-    //   `${
-    //     selected.value === "sold"
-    //       ? "MST người mua/MST người nhận hàng"
-    //       : "MST người bán/MST người xuất hàng"
-    //   }`,
-    //   `${
-    //     selected.value === "sold"
-    //       ? "Tên người mua/Tên người nhận hàng"
-    //       : "Tên người bán/Tên người xuất hàng"
-    //   }`,
-
-    //   "Tổng tiền chưa thuế",
-    //   "Tổng tiền thuế",
-    //   "Tổng tiền chiết khấu thương mại",
-    //   "Tổng tiền phí",
-    //   "Tổng tiền thanh toán",
-    //   "Đơn vị tiền tệ",
-    //   "Tỷ giá",
-    //   "Trạng thái hóa đơn",
-    //   "Kết quả kiểm tra hóa đơn",
-    // ]);
-    // dataQueries
-    //   .reduce((total, item) => [...total, ...item.data], [])
-    //   .forEach((item, index) => {
-    //     workSheet.addRow([
-    //       index + 1,
-    //       item.khmshdon,
-    //       item.khhdon,
-    //       item.shdon,
-    //       item.ntao.split("T")[0].split("-").reverse().join("/"),
-    //       selected.value === "buy" ? item.nbmst : item.nmmst,
-    //       selected.value === "buy" ? item.nbten : item.nmten,
-    //       // selected.value === "buy" ? item.nbdchi : item.nmdchi,
-    //       item.tgtcthue,
-    //       item.tgtthue,
-    //       item.tgtkhac,
-    //       item.tgtphi,
-    //       item.tgtttbso,
-    //       item.dvtte,
-    //       item.tgia,
-    //     ]);
-    //   });
 
     if (selected.value === "sold") {
       const sheet = workBook.addWorksheet("chitiethoadon");
@@ -393,6 +330,464 @@ const Main = ({ token }) => {
     }
   };
 
+  const exportExcelModified = async () => {
+    const workBook = new ExcelJS.Workbook();
+
+    if (selected.value === "buy") {
+      const sheet = workBook.addWorksheet("chitiethoadon");
+      sheet.addRow([
+        "Loại CT",
+        "Số CT",
+        "Ngày CT",
+        "TK Nợ",
+        "TK Có",
+        "TTVND",
+        "Diễn giải",
+        "ĐT Nợ",
+        "ĐT Có",
+        "VND Thanh toán",
+        "KN",
+        "VT-CT Nợ",
+        "KX",
+        "VT-CT Có",
+        "Tên vật tư - Công trình",
+        "ĐVT",
+        "Số lượng",
+        "Chỉ số cũ",
+        "Chỉ số mới",
+        "ĐG VND",
+        "Người giao dịch",
+        "Địa chỉ người giao dịch",
+        "Ghi chú",
+        "Pháp nhân",
+        "Địa chỉ pháp nhân",
+        "MST",
+        "Số TKNH",
+        "HTTT",
+        "Nhóm hàng",
+        "%VAT",
+        "%CK",
+        "Ký hiệu HĐ",
+        "Số HD VAT",
+        "Ngày VAT",
+        "Nghiệp vụ thu",
+        "Nhóm HĐ",
+        "STT",
+        "Ngày VS",
+        "User nhập",
+        "User khoá",
+      ]);
+
+      dataQueries
+        .reduce((total, item) => [...total, ...item.data], [])
+        .reduce((total, item) => [...total, item.detailInvoices], [])
+        .forEach((item) => {
+          // let thueRow;
+          item.hdhhdvu.forEach((el) => {
+            sheet.addRow([
+              "PKT",
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "156",
+              "331",
+              el?.thtien,
+              `Mua ${el?.ten}`,
+              "",
+              "",
+              "",
+              "1",
+              "",
+              "",
+              "",
+              el?.ten,
+              el?.dvtinh,
+              el?.sluong,
+              "",
+              "",
+              el?.dgia,
+              item?.nbten,
+              item?.nbdchi,
+              "",
+              item?.nbten,
+              item?.nbdchi,
+              item?.nbmst,
+              "",
+              "",
+              el?.ten,
+              el.ltsuat
+                ? el.ltsuat === "KCT"
+                  ? el.ltsuat
+                  : el.ltsuat.replace("%", "")
+                : "",
+              el?.tlckhau,
+              item?.khhdon,
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "A2",
+              "1",
+              "",
+              moment().format("DD/MM/yyy"),
+              "ADM",
+              "",
+            ]);
+
+            sheet.addRow([
+              "PKT",
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "156",
+              "331",
+              "",
+              `Mua ${el?.ten}`,
+              "",
+              "",
+              "",
+              "1",
+              "",
+              "",
+              "",
+              el?.ten,
+              el?.dvtinh,
+              el?.sluong,
+              "",
+              "",
+              "",
+              item?.nbten,
+              item?.nbdchi,
+              "",
+              item?.nbten,
+              item?.nbdchi,
+              item?.nbmst,
+              "",
+              "",
+              el?.ten,
+              el.ltsuat
+                ? el.ltsuat === "KCT"
+                  ? el.ltsuat
+                  : el.ltsuat.replace("%", "")
+                : "",
+              el?.tlckhau,
+              item?.khhdon,
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "A2",
+              "1",
+              "",
+              moment().format("DD/MM/yyy"),
+              "ADM",
+              "",
+            ]);
+          });
+
+          sheet.addRow([
+            "PKT",
+            item?.khhdon,
+            item?.ntao.split("T")[0].split("-").reverse().join("/"),
+            "1331",
+            "331",
+            item?.thttltsuat[0]?.tthue,
+            "Thuế GTGT",
+            "",
+            "",
+            "",
+            "1",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            item?.nbten,
+            item?.nbdchi,
+            "",
+            item?.nbten,
+            item?.nbdchi,
+            item?.nbmst,
+            "",
+            "",
+            "",
+            item?.thttltsuat[0]?.tsuat
+              ? item?.thttltsuat[0]?.tsuat === "KCT"
+                ? item?.thttltsuat[0]?.tsuat
+                : item?.thttltsuat[0]?.tsuat.replace("%", "")
+              : "",
+            "",
+            item?.khhdon,
+            item?.khhdon,
+            item?.ntao.split("T")[0].split("-").reverse().join("/"),
+            "A2",
+            "1",
+            "",
+            moment().format("DD/MM/yyy"),
+            "ADM",
+            "",
+          ]);
+        });
+
+      const buf = await workBook.xlsx.writeBuffer();
+      saveAs(new Blob([buf]), `dataModified.xlsx`);
+    } else {
+      const sheet = workBook.addWorksheet("chitiethoadon");
+      sheet.addRow([
+        "Loại CT",
+        "Số CT",
+        "Ngày CT",
+        "TK Nợ",
+        "TK Có",
+        "TTVND",
+        "Diễn giải",
+        "ĐT Nợ",
+        "ĐT Có",
+        "VND Thanh toán",
+        "KN",
+        "VT-CT Nợ",
+        "KX",
+        "VT-CT Có",
+        "Tên vật tư - Công trình",
+        "ĐVT",
+        "Số lượng",
+        "Chỉ số cũ",
+        "Chỉ số mới",
+        "ĐG VND",
+        "Người giao dịch",
+        "Địa chỉ người giao dịch",
+        "Ghi chú",
+        "Pháp nhân",
+        "Địa chỉ pháp nhân",
+        "MST",
+        "Số TKNH",
+        "HTTT",
+        "Nhóm hàng",
+        "%VAT",
+        "%CK",
+        "Ký hiệu HĐ",
+        "Số HD VAT",
+        "Ngày VAT",
+        "Nghiệp vụ thu",
+        "Nhóm HĐ",
+        "STT",
+        "Ngày VS",
+        "User nhập",
+        "User khoá",
+      ]);
+
+      dataQueries
+        .reduce((total, item) => [...total, ...item.data], [])
+        .reduce((total, item) => [...total, item.detailInvoices], [])
+        .forEach((item) => {
+          let thueRow = [];
+          item.hdhhdvu.forEach((el) => {
+            sheet.addRow([
+              "HD",
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "131",
+              "5111",
+              el?.thtien,
+              `Bán ${el?.ten}`,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "1",
+              "",
+              el?.ten,
+              el?.dvtinh,
+              el?.sluong,
+              "",
+              "",
+              el?.dgia,
+              item?.nmten,
+              item?.nmdchi,
+              "",
+              item?.nmten,
+              item?.nmdchi,
+              item?.nmmst,
+              "",
+              "",
+              el?.ten,
+              el.ltsuat
+                ? el.ltsuat === "KCT"
+                  ? el.ltsuat
+                  : el.ltsuat.replace("%", "")
+                : "",
+              el?.tlckhau,
+              item?.khhdon,
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "A1",
+              "1",
+              "",
+              moment().format("DD/MM/yyy"),
+              "ADM",
+              "",
+            ]);
+
+            sheet.addRow([
+              "TDXK",
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "632",
+              "156",
+              "",
+              `Bán ${el?.ten}`,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "1",
+              "",
+              el?.ten,
+              el?.dvtinh,
+              el?.sluong,
+              "",
+              "",
+              "",
+              item?.nmten,
+              item?.nmdchi,
+              "",
+              item?.nmten,
+              item?.nmdchi,
+              item?.nmmst,
+              "",
+              "",
+              el?.ten,
+              el.ltsuat
+                ? el.ltsuat === "KCT"
+                  ? el.ltsuat
+                  : el.ltsuat.replace("%", "")
+                : "",
+              el?.tlckhau,
+              item?.khhdon,
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "A1",
+              "1",
+              "",
+              moment().format("DD/MM/yyy"),
+              "ADM",
+              "",
+            ]);
+
+            thueRow = [
+              ...thueRow,
+              [
+                "HD",
+                item?.khhdon,
+                item?.ntao.split("T")[0].split("-").reverse().join("/"),
+                "131",
+                "33311",
+                el.ltsuat !== "KCT" && el.ltsuat
+                  ? parseInt(el.thtien) *
+                    (parseInt(el.ltsuat.replace("%", "")) / 100)
+                  : 0,
+                "Thuế GTGT",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "1",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                item?.nmten,
+                item?.nmdchi,
+                "",
+                item?.nmten,
+                item?.nmdchi,
+                item?.nmmst,
+                "",
+                "",
+                "",
+                el.ltsuat
+                  ? el.ltsuat === "KCT"
+                    ? el.ltsuat
+                    : el.ltsuat.replace("%", "")
+                  : "",
+                "",
+                item?.khhdon,
+                item?.khhdon,
+                item?.ntao.split("T")[0].split("-").reverse().join("/"),
+                "A1",
+                "1",
+                "",
+                moment().format("DD/MM/yyy"),
+                "ADM",
+                "",
+              ],
+            ];
+          });
+
+          if (
+            item.hdhhdvu.every((el) => el.ltsuat === item.hdhhdvu[0].ltsuat)
+          ) {
+            thueRow.forEach((el) => sheet.addRow(el));
+          } else {
+            sheet.addRow([
+              "HD",
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "131",
+              "33311",
+              item?.thttltsuat[0]?.tthue,
+              "Thuế GTGT",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              item?.nmten,
+              item?.nmdchi,
+              "",
+              item?.nmten,
+              item?.nmdchi,
+              item?.nmmst,
+              "",
+              "",
+              "",
+              item?.thttltsuat[0]?.tsuat
+                ? item?.thttltsuat[0]?.tsuat === "KCT"
+                  ? item?.thttltsuat[0]?.tsuat
+                  : item?.thttltsuat[0]?.tsuat.replace("%", "")
+                : "",
+              "",
+              item?.khhdon,
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "A1",
+              "1",
+              "",
+              moment().format("DD/MM/yyy"),
+              "ADM",
+              "",
+            ]);
+          }
+        });
+      const buf = await workBook.xlsx.writeBuffer();
+      saveAs(new Blob([buf]), `dataModified.xlsx`);
+    }
+  };
+
+  console.log(dataQueries);
+
   const handleOnClick = async () => {
     setIsEnable(true);
   };
@@ -479,6 +874,18 @@ const Main = ({ token }) => {
           onPress={() => exportExcel()}
         >
           Xuất Excel
+        </Button>
+        <Button
+          className="w-fit"
+          color="primary"
+          isDisabled={
+            dataQueries.length === 0 ||
+            dataQueries.every((item) => !item.isSuccess) ||
+            dataQueries.some((item) => item.isLoading)
+          }
+          onPress={() => exportExcelModified()}
+        >
+          Xuất Excel Modified
         </Button>
       </div>
     </div>

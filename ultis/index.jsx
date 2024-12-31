@@ -131,7 +131,7 @@ export async function fetchAllPages(type, data, token) {
             return { ...item, detailInvoices: processResponse };
           } catch (error) {
             console.error("Error processing item:", item.id, error.message);
-            return { ...item, additionalData: null }; // Fallback in case of error
+            return { ...item, detailInvoices: null }; // Fallback in case of error
           }
         })
       );
