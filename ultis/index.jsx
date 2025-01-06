@@ -96,8 +96,8 @@ export async function fetchAllPages(type, data, token) {
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   // Helper function to generate a random delay
-  const randomDelay = (minMs, maxMs) =>
-    Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+  // const randomDelay = (minMs, maxMs) =>
+  //   Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 
   while (state) {
     try {
