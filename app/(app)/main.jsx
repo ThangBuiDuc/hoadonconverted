@@ -8,6 +8,15 @@ import { fetchAllPages } from "@/ultis";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@nextui-org/modal";
+import { Input } from "@nextui-org/input";
+import { importData } from "./action";
 
 const options = [
   { value: "buy", label: "Mua" },
@@ -74,6 +83,61 @@ function getMonthsInRange(start, end) {
   return months;
 }
 
+const ImportModal = ({ isOpen, onOpenChange }) => {
+  const [path, setPath] = useState("");
+  const [password, setPassword] = useState("");
+  const [file, setFile] = useState(null);
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  console.log(file);
+  return (
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="flex flex-col gap-1">
+              Nhập dữ liệu từ tổng cục thuế vào Access
+            </ModalHeader>
+            <ModalBody>
+              <Input type="file" onChange={handleFileChange} />
+              <Input
+                type="text"
+                placeholder="VD C:/Users/PC/Desktop/data.mdb"
+                variant="bordered"
+                label="Đường dẫn file Access"
+                value={path}
+                onValueChange={setPath}
+              />
+              <Input
+                type="password"
+                placeholder="Điền nếu có mật khẩu"
+                variant="bordered"
+                label="Mật khẩu"
+                value={password}
+                onValueChange={setPassword}
+              />
+            </ModalBody>
+            <ModalFooter>
+              <Button color="danger" variant="light" onPress={onClose}>
+                Đóng
+              </Button>
+              <Button
+                color="primary"
+                onPress={() => importData(path, password)}
+                isDisabled={!path}
+              >
+                Nhập dữ liệu
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  );
+};
+
 const Main = ({ token }) => {
   const queryClient = useQueryClient();
   const [start, setStart] = useState("");
@@ -84,6 +148,7 @@ const Main = ({ token }) => {
   // const [range, setRange] = useState([]);
   // const [results, setResults] = useState([]);
   const [isEnable, setIsEnable] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // const { data, isLoading } = useQuery({
   //   queryKey: ["search", selected.value, start, end],
@@ -786,7 +851,7 @@ const Main = ({ token }) => {
     }
   };
 
-  console.log(dataQueries);
+  // console.log(dataQueries);
 
   const handleOnClick = async () => {
     setIsEnable(true);
@@ -887,6 +952,22 @@ const Main = ({ token }) => {
         >
           Xuất Excel Modified
         </Button>
+        <Button
+          className="w-fit"
+          color="primary"
+          isDisabled={
+            dataQueries.length === 0 ||
+            dataQueries.every((item) => !item.isSuccess) ||
+            dataQueries.some((item) => item.isLoading)
+          }
+          onPress={() => {
+            console.log("open modal");
+            setIsModalOpen(true);
+          }}
+        >
+          Nhập dữ liệu vào Access
+        </Button>
+        <ImportModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
       </div>
     </div>
   );
