@@ -11,7 +11,7 @@ const Content = ({ captchaData }) => {
 
   const verify = (e) => {
     e.preventDefault();
-    if (1) {
+    if (key === process.env.NEXT_PUBLIC_KEY) {
       setIsVerify(true);
     }
   };
