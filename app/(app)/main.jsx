@@ -1,7 +1,7 @@
 "use client";
 
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import { Button } from "@heroui/button";
 import { fetchAllPages } from "@/ultis";
@@ -91,6 +91,8 @@ const Main = ({ token }) => {
   const [khachHang, setkhachHang] = useState([]);
   const [vatTu, setVatTu] = useState([]);
   const [STT, setSTT] = useState(null);
+  const ref = useRef();
+  const [file, setFile] = useState(null);
 
   // const { data, isLoading } = useQuery({
   //   queryKey: ["search", selected.value, start, end],
@@ -166,6 +168,66 @@ const Main = ({ token }) => {
       label: "Tất cả",
     });
   }, [selected.value]);
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setFile(file);
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        // Read the uploaded file as ArrayBuffer
+        const arrayBuffer = await file.arrayBuffer();
+
+        // Initialize the MDBReader
+        const reader = new MDBReader(Buffer.from(arrayBuffer), {
+          password: password,
+        });
+
+        // Get all table names
+        // const tables = reader.getTableNames();
+        // console.log(tables);
+
+        const socai = reader.getTable("SoCai");
+        setSTT(socai.getData({ rowOffset: socai.rowCount - 1 })[0].RECNO);
+
+        const khachhang = reader.getTable("KhachHang");
+        setkhachHang(
+          khachhang.getData().map((item) => ({
+            ...item,
+            MAKH: toUnicode(item.MAKH, "TCVN3"),
+            TENKH: toUnicode(item.TENKH, "TCVN3"),
+          }))
+        );
+
+        const vattu = reader.getTable("VTHH");
+        setVatTu(
+          vattu.getData().map((item) => ({
+            ...item,
+            MAVTHH: toUnicode(item.MAVTHH, "TCVN3"),
+            TENVTHH: toUnicode(item.TENVTHH, "TCVN3"),
+          }))
+        );
+
+        // // Optional: Automatically load data from the first table
+        // if (tables.length > 0) {
+        //   const table = reader.getTable(tables[0]);
+        //   const data = table.getData();
+        //   setTableData(data);
+        // }
+      } catch (error) {
+        console.error("Error reading MDB file:", error);
+        alert("Failed to read the MDB file. Please try another file.");
+      }
+    };
+
+    if (file) {
+      load();
+    }
+  }, [file]);
 
   const exportExcel = async () => {
     const workBook = new ExcelJS.Workbook();
@@ -254,7 +316,7 @@ const Main = ({ token }) => {
         });
 
       const buf = await workBook.xlsx.writeBuffer();
-      saveAs(new Blob([buf]), `data.xlsx`);
+      saveAs(new Blob([buf]), `sold-data.xlsx`);
     } else {
       const sheet = workBook.addWorksheet("chitiethoadon");
       sheet.addRow([
@@ -333,7 +395,7 @@ const Main = ({ token }) => {
         });
 
       const buf = await workBook.xlsx.writeBuffer();
-      saveAs(new Blob([buf]), `data.xlsx`);
+      saveAs(new Blob([buf]), `purchase-data.xlsx`);
     }
   };
 
@@ -410,7 +472,7 @@ const Main = ({ token }) => {
           item.hdhhdvu.forEach((el) => {
             row.push([
               "PKT",
-              item?.khhdon,
+              item?.shdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
               "156",
               "331",
@@ -445,7 +507,7 @@ const Main = ({ token }) => {
                 : "",
               el?.tlckhau,
               item?.khhdon,
-              item?.khhdon,
+              item?.shdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
               "A2",
               "1",
@@ -455,58 +517,58 @@ const Main = ({ token }) => {
               "",
             ]);
 
-            row.push([
-              "PKT",
-              item?.khhdon,
-              item?.ntao.split("T")[0].split("-").reverse().join("/"),
-              "156",
-              "331",
-              "",
-              `Mua ${el?.ten}`,
-              "",
-              khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
-              "",
-              "1",
-              vatTu.find((el1) => el1.TENVTHH === el?.ten)?.MAVTHH,
-              "",
-              "",
-              el?.ten,
-              el?.dvtinh,
-              el?.sluong,
-              "",
-              "",
-              "",
-              item?.nbten,
-              item?.nbdchi,
-              "",
-              item?.nbten,
-              item?.nbdchi,
-              item?.nbmst,
-              "",
-              "",
-              el?.ten,
-              el.ltsuat
-                ? el.ltsuat === "KCT"
-                  ? el.ltsuat
-                  : el.ltsuat.replace("%", "")
-                : "",
-              el?.tlckhau,
-              item?.khhdon,
-              item?.khhdon,
-              item?.ntao.split("T")[0].split("-").reverse().join("/"),
-              "A2",
-              "1",
-              "",
-              moment().format("DD/MM/yyy"),
-              "ADM",
-              "",
-            ]);
+            // row.push([
+            //   "PKT",
+            //   item?.shdon,
+            //   item?.ntao.split("T")[0].split("-").reverse().join("/"),
+            //   "156",
+            //   "331",
+            //   "",
+            //   `Mua ${el?.ten}`,
+            //   "",
+            //   khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
+            //   "",
+            //   "1",
+            //   vatTu.find((el1) => el1.TENVTHH === el?.ten)?.MAVTHH,
+            //   "",
+            //   "",
+            //   el?.ten,
+            //   el?.dvtinh,
+            //   el?.sluong,
+            //   "",
+            //   "",
+            //   "",
+            //   item?.nbten,
+            //   item?.nbdchi,
+            //   "",
+            //   item?.nbten,
+            //   item?.nbdchi,
+            //   item?.nbmst,
+            //   "",
+            //   "",
+            //   el?.ten,
+            //   el.ltsuat
+            //     ? el.ltsuat === "KCT"
+            //       ? el.ltsuat
+            //       : el.ltsuat.replace("%", "")
+            //     : "",
+            //   el?.tlckhau,
+            //   item?.khhdon,
+            //   item?.shdon,
+            //   item?.ntao.split("T")[0].split("-").reverse().join("/"),
+            //   "A2",
+            //   "1",
+            //   "",
+            //   moment().format("DD/MM/yyy"),
+            //   "ADM",
+            //   "",
+            // ]);
           });
           // stt = stt + 3;
           // console.log(stt);
           row.push([
             "PKT",
-            item?.khhdon,
+            item?.shdon,
             item?.ntao.split("T")[0].split("-").reverse().join("/"),
             "1331",
             "331",
@@ -541,7 +603,7 @@ const Main = ({ token }) => {
               : "",
             "",
             item?.khhdon,
-            item?.khhdon,
+            item?.shdon,
             item?.ntao.split("T")[0].split("-").reverse().join("/"),
             "A2",
             "1",
@@ -560,10 +622,12 @@ const Main = ({ token }) => {
         .forEach((item) => sheet.addRow(item));
       setSTT(stt + row.length - 1);
       const buf = await workBook.xlsx.writeBuffer();
-      saveAs(new Blob([buf]), `dataModified.xlsx`);
+      saveAs(new Blob([buf]), `purchase-dataModified.xlsx`);
+      ref.current.value = "";
+      setFile(null);
     } else {
       let row = [];
-      let middleSTT = stt;
+      // let middleSTT = stt;
       // const sheet = workBook.addWorksheet("chitiethoadon");
       sheet.addRow([
         "Loại CT",
@@ -616,7 +680,7 @@ const Main = ({ token }) => {
           item.hdhhdvu.forEach((el) => {
             row.push([
               "HD",
-              item?.khhdon,
+              item?.shdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
               "131",
               "5111",
@@ -651,7 +715,7 @@ const Main = ({ token }) => {
                 : "",
               el?.tlckhau,
               item?.khhdon,
-              item?.khhdon,
+              item?.shdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
               "A1",
               "1",
@@ -663,7 +727,7 @@ const Main = ({ token }) => {
 
             row.push([
               "TDXK",
-              item?.khhdon,
+              item?.shdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
               "632",
               "156",
@@ -698,7 +762,7 @@ const Main = ({ token }) => {
                 : "",
               el?.tlckhau,
               item?.khhdon,
-              item?.khhdon,
+              item?.shdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
               "A1",
               "1",
@@ -712,7 +776,7 @@ const Main = ({ token }) => {
               ...thueRow,
               [
                 "HD",
-                item?.khhdon,
+                item?.shdon,
                 item?.ntao.split("T")[0].split("-").reverse().join("/"),
                 "131",
                 "33311",
@@ -750,7 +814,7 @@ const Main = ({ token }) => {
                   : "",
                 "",
                 item?.khhdon,
-                item?.khhdon,
+                item?.shdon,
                 item?.ntao.split("T")[0].split("-").reverse().join("/"),
                 "A1",
                 "1",
@@ -767,7 +831,7 @@ const Main = ({ token }) => {
           ) {
             row.push([
               "HD",
-              item?.khhdon,
+              item?.shdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
               "131",
               "33311",
@@ -802,7 +866,7 @@ const Main = ({ token }) => {
                 : "",
               "",
               item?.khhdon,
-              item?.khhdon,
+              item?.shdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
               "A1",
               "1",
@@ -825,67 +889,17 @@ const Main = ({ token }) => {
         });
 
       const buf = await workBook.xlsx.writeBuffer();
-      saveAs(new Blob([buf]), `dataModified.xlsx`);
+      saveAs(new Blob([buf]), `sold-dataModified.xlsx`);
+      ref.current.value = "";
+      setFile(null);
     }
   };
 
-  console.log(STT);
+  // console.log(STT);
 
   const handleOnClick = () => {
     setIsEnable(true);
   };
-
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    try {
-      // Read the uploaded file as ArrayBuffer
-      const arrayBuffer = await file.arrayBuffer();
-
-      // Initialize the MDBReader
-      const reader = new MDBReader(Buffer.from(arrayBuffer), {
-        password: password,
-      });
-
-      // Get all table names
-      // const tables = reader.getTableNames();
-      // console.log(tables);
-
-      const socai = reader.getTable("SoCai");
-      setSTT(socai.getData({ rowOffset: socai.rowCount - 1 })[0].RECNO);
-
-      const khachhang = reader.getTable("KhachHang");
-      setkhachHang(
-        khachhang.getData().map((item) => ({
-          ...item,
-          MAKH: toUnicode(item.MAKH, "TCVN3"),
-          TENKH: toUnicode(item.TENKH, "TCVN3"),
-        }))
-      );
-
-      const vattu = reader.getTable("VTHH");
-      setVatTu(
-        vattu.getData().map((item) => ({
-          ...item,
-          MAVTHH: toUnicode(item.MAVTHH, "TCVN3"),
-          TENVTHH: toUnicode(item.TENVTHH, "TCVN3"),
-        }))
-      );
-
-      // // Optional: Automatically load data from the first table
-      // if (tables.length > 0) {
-      //   const table = reader.getTable(tables[0]);
-      //   const data = table.getData();
-      //   setTableData(data);
-      // }
-    } catch (error) {
-      console.error("Error reading MDB file:", error);
-      alert("Failed to read the MDB file. Please try another file.");
-    }
-  };
-
-  console.log(STT);
 
   return (
     <div className=" w-[100vw] h-[100vh] align-middle flex flex-col p-4 gap-2 justify-center items-center">
@@ -952,6 +966,7 @@ const Main = ({ token }) => {
       <div className="flex gap-2 items-center">
         <h6 className="w-fit">File Access:</h6>
         <Input
+          ref={ref}
           type="file"
           accept=".mdb,.accdb"
           onChange={handleFileUpload}
@@ -988,6 +1003,7 @@ const Main = ({ token }) => {
           color="primary"
           isDisabled={
             dataQueries.length === 0 ||
+            !file ||
             khachHang.length === 0 ||
             vatTu.length === 0 ||
             STT === null ||
