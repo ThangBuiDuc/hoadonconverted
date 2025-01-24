@@ -1,7 +1,7 @@
 import "./globals.css";
 import ReactQueryProvider from "./ReactQueryProvider";
 import localFont from "next/font/local";
-import { NextUIProvider } from "@nextui-org/system";
+import { HeroUIProvider } from "@heroui/system";
 const montserrat = localFont({
   src: [
     {
@@ -23,15 +23,15 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     // <ViewTransitions>
-    <html lang="en">
+    // </ViewTransitions>
+    (<html lang="en">
       <body className={`${montserrat.className} bg-white `}>
-        <NextUIProvider>
+        <HeroUIProvider>
           <ReactQueryProvider>
             <main>{children}</main>
           </ReactQueryProvider>
-        </NextUIProvider>
+        </HeroUIProvider>
       </body>
-    </html>
-    // </ViewTransitions>
+    </html>)
   );
 }

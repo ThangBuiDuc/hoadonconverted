@@ -3,19 +3,14 @@
 import moment from "moment";
 import { useEffect, useState } from "react";
 import Select from "react-select";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { fetchAllPages } from "@/ultis";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@nextui-org/modal";
-import { Input } from "@nextui-org/input";
+import { Input } from "@heroui/input";
+import MDBReader from "mdb-reader";
+import { toUnicode } from "vietnamese-conversion";
 
 const options = [
   { value: "buy", label: "Mua" },
@@ -92,6 +87,9 @@ const Main = ({ token }) => {
   // const [range, setRange] = useState([]);
   // const [results, setResults] = useState([]);
   const [isEnable, setIsEnable] = useState(false);
+  const [password, setPassword] = useState("");
+  const [khachHang, setkhachHang] = useState([]);
+  const [vatTu, setVatTu] = useState([]);
 
   // const { data, isLoading } = useQuery({
   //   queryKey: ["search", selected.value, start, end],
@@ -341,8 +339,22 @@ const Main = ({ token }) => {
   const exportExcelModified = async () => {
     const workBook = new ExcelJS.Workbook();
 
+    const sheet = workBook.addWorksheet("chitiethoadon");
+
+    const khachHangSheet = workBook.addWorksheet("khachhang");
+
+    khachHangSheet.addRow(["Mã KH", "Tên KH"]);
+    khachHang.forEach((item) => {
+      khachHangSheet.addRow([item.MAKH, item.TENKH]);
+    });
+
+    const vatTuSheet = workBook.addWorksheet("vattu");
+    vatTuSheet.addRow(["Mã VTHH", "Tên VTHH"]);
+    vatTu.forEach((item) => {
+      vatTuSheet.addRow([item.MAVTHH, item.TENVTHH]);
+    });
+
     if (selected.value === "buy") {
-      const sheet = workBook.addWorksheet("chitiethoadon");
       sheet.addRow([
         "Loại CT",
         "Số CT",
@@ -401,10 +413,10 @@ const Main = ({ token }) => {
               el?.thtien,
               `Mua ${el?.ten}`,
               "",
-              "",
+              khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
               "",
               "1",
-              "",
+              vatTu.find((el1) => el1.TENVTHH === el?.ten)?.MAVTHH,
               "",
               "",
               el?.ten,
@@ -448,10 +460,10 @@ const Main = ({ token }) => {
               "",
               `Mua ${el?.ten}`,
               "",
-              "",
+              khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
               "",
               "1",
-              "",
+              vatTu.find((el1) => el1.TENVTHH === el?.ten)?.MAVTHH,
               "",
               "",
               el?.ten,
@@ -496,7 +508,7 @@ const Main = ({ token }) => {
             item?.thttltsuat[0]?.tthue,
             "Thuế GTGT",
             "",
-            "",
+            khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
             "",
             "1",
             "",
@@ -538,7 +550,7 @@ const Main = ({ token }) => {
       const buf = await workBook.xlsx.writeBuffer();
       saveAs(new Blob([buf]), `dataModified.xlsx`);
     } else {
-      const sheet = workBook.addWorksheet("chitiethoadon");
+      // const sheet = workBook.addWorksheet("chitiethoadon");
       sheet.addRow([
         "Loại CT",
         "Số CT",
@@ -596,13 +608,13 @@ const Main = ({ token }) => {
               "5111",
               el?.thtien,
               `Bán ${el?.ten}`,
-              "",
+              khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
               "",
               "",
               "",
               "",
               "1",
-              "",
+              vatTu.find((el1) => el1.TENVTHH === el?.ten)?.MAVTHH,
               el?.ten,
               el?.dvtinh,
               el?.sluong,
@@ -643,13 +655,13 @@ const Main = ({ token }) => {
               "156",
               "",
               `Bán ${el?.ten}`,
-              "",
+              khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
               "",
               "",
               "",
               "",
               "1",
-              "",
+              vatTu.find((el1) => el1.TENVTHH === el?.ten)?.MAVTHH,
               el?.ten,
               el?.dvtinh,
               el?.sluong,
@@ -695,7 +707,7 @@ const Main = ({ token }) => {
                     (parseInt(el.ltsuat.replace("%", "")) / 100)
                   : 0,
                 "Thuế GTGT",
-                "",
+                khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
                 "",
                 "",
                 "",
@@ -741,58 +753,157 @@ const Main = ({ token }) => {
           ) {
             thueRow.forEach((el) => sheet.addRow(el));
           } else {
-            sheet.addRow([
-              "HD",
-              item?.khhdon,
-              item?.ntao.split("T")[0].split("-").reverse().join("/"),
-              "131",
-              "33311",
-              item?.thttltsuat[0]?.tthue,
-              "Thuế GTGT",
-              "",
-              "",
-              "",
-              "",
-              "",
-              "1",
-              "",
-              "",
-              "",
-              "",
-              "",
-              "",
-              "",
-              item?.nmten,
-              item?.nmdchi,
-              "",
-              item?.nmten,
-              item?.nmdchi,
-              item?.nmmst,
-              "",
-              "",
-              "",
-              item?.thttltsuat[0]?.tsuat
-                ? item?.thttltsuat[0]?.tsuat === "KCT"
-                  ? item?.thttltsuat[0]?.tsuat
-                  : item?.thttltsuat[0]?.tsuat.replace("%", "")
-                : "",
-              "",
-              item?.khhdon,
-              item?.khhdon,
-              item?.ntao.split("T")[0].split("-").reverse().join("/"),
-              "A1",
-              "1",
-              "",
-              moment().format("DD/MM/yyy"),
-              "ADM",
-              "",
-            ]);
+            if (selected.value === "buy") {
+              sheet.addRow([
+                "HD",
+                item?.khhdon,
+                item?.ntao.split("T")[0].split("-").reverse().join("/"),
+                "131",
+                "33311",
+                item?.thttltsuat[0]?.tthue,
+                "Thuế GTGT",
+                "",
+                khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
+                "",
+                "",
+                "",
+                "1",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                item?.nbten,
+                item?.nbdchi,
+                "",
+                item?.nbten,
+                item?.nbdchi,
+                item?.nbmst,
+                "",
+                "",
+                "",
+                item?.thttltsuat[0]?.tsuat
+                  ? item?.thttltsuat[0]?.tsuat === "KCT"
+                    ? item?.thttltsuat[0]?.tsuat
+                    : item?.thttltsuat[0]?.tsuat.replace("%", "")
+                  : "",
+                "",
+                item?.khhdon,
+                item?.khhdon,
+                item?.ntao.split("T")[0].split("-").reverse().join("/"),
+                "A1",
+                "1",
+                "",
+                moment().format("DD/MM/yyy"),
+                "ADM",
+                "",
+              ]);
+            } else {
+              sheet.addRow([
+                "HD",
+                item?.khhdon,
+                item?.ntao.split("T")[0].split("-").reverse().join("/"),
+                "131",
+                "33311",
+                item?.thttltsuat[0]?.tthue,
+                "Thuế GTGT",
+                khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
+                "",
+                "",
+                "",
+                "",
+                "1",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                item?.nmten,
+                item?.nmdchi,
+                "",
+                item?.nmten,
+                item?.nmdchi,
+                item?.nmmst,
+                "",
+                "",
+                "",
+                item?.thttltsuat[0]?.tsuat
+                  ? item?.thttltsuat[0]?.tsuat === "KCT"
+                    ? item?.thttltsuat[0]?.tsuat
+                    : item?.thttltsuat[0]?.tsuat.replace("%", "")
+                  : "",
+                "",
+                item?.khhdon,
+                item?.khhdon,
+                item?.ntao.split("T")[0].split("-").reverse().join("/"),
+                "A1",
+                "1",
+                "",
+                moment().format("DD/MM/yyy"),
+                "ADM",
+                "",
+              ]);
+            }
           }
         });
       const buf = await workBook.xlsx.writeBuffer();
       saveAs(new Blob([buf]), `dataModified.xlsx`);
     }
   };
+
+  const handleOnClick = () => {
+    setIsEnable(true);
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      // Read the uploaded file as ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+
+      // Initialize the MDBReader
+      const reader = new MDBReader(Buffer.from(arrayBuffer), {
+        password: password,
+      });
+
+      // Get all table names
+      // const tables = reader.getTableNames();
+      // console.log(tables);
+
+      const khachhang = reader.getTable("KhachHang");
+      setkhachHang(
+        khachhang
+          .getData()
+          .map((item) => ({ ...item, TENKH: toUnicode(item.TENKH, "TCVN3") }))
+      );
+
+      const vattu = reader.getTable("VTHH");
+      setVatTu(
+        vattu.getData().map((item) => ({
+          ...item,
+          TENVTHH: toUnicode(item.TENVTHH, "TCVN3"),
+        }))
+      );
+
+      // // Optional: Automatically load data from the first table
+      // if (tables.length > 0) {
+      //   const table = reader.getTable(tables[0]);
+      //   const data = table.getData();
+      //   setTableData(data);
+      // }
+    } catch (error) {
+      console.error("Error reading MDB file:", error);
+      alert("Failed to read the MDB file. Please try another file.");
+    }
+  };
+
+  console.log(khachHang, vatTu);
 
   return (
     <div className=" w-[100vw] h-[100vh] align-middle flex flex-col p-4 gap-2 justify-center items-center">
@@ -852,6 +963,19 @@ const Main = ({ token }) => {
           className="w-[200px]"
         />
       </div>
+      <div className="flex gap-2 items-center">
+        <h6 className="w-fit">Mật khẩu file Access:</h6>
+        <Input type="password" value={password} onValueChange={setPassword} />
+      </div>
+      <div className="flex gap-2 items-center">
+        <h6 className="w-fit">File Access:</h6>
+        <Input
+          type="file"
+          accept=".mdb,.accdb"
+          onChange={handleFileUpload}
+          isDisabled={!password}
+        />
+      </div>
 
       <div className="flex gap-2">
         <Button
@@ -882,6 +1006,8 @@ const Main = ({ token }) => {
           color="primary"
           isDisabled={
             dataQueries.length === 0 ||
+            khachHang.length === 0 ||
+            vatTu.length === 0 ||
             dataQueries.every((item) => !item.isSuccess) ||
             dataQueries.some((item) => item.isLoading)
           }
