@@ -90,6 +90,7 @@ const Main = ({ token }) => {
   const [password, setPassword] = useState("");
   const [khachHang, setkhachHang] = useState([]);
   const [vatTu, setVatTu] = useState([]);
+  const [STT, setSTT] = useState(null);
 
   // const { data, isLoading } = useQuery({
   //   queryKey: ["search", selected.value, start, end],
@@ -337,6 +338,7 @@ const Main = ({ token }) => {
   };
 
   const exportExcelModified = async () => {
+    let stt = STT + 1;
     const workBook = new ExcelJS.Workbook();
 
     const sheet = workBook.addWorksheet("chitiethoadon");
@@ -355,6 +357,8 @@ const Main = ({ token }) => {
     });
 
     if (selected.value === "buy") {
+      let row = [];
+      // console.log(1);
       sheet.addRow([
         "Loại CT",
         "Số CT",
@@ -404,7 +408,7 @@ const Main = ({ token }) => {
         .forEach((item) => {
           // let thueRow;
           item.hdhhdvu.forEach((el) => {
-            sheet.addRow([
+            row.push([
               "PKT",
               item?.khhdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
@@ -451,7 +455,7 @@ const Main = ({ token }) => {
               "",
             ]);
 
-            sheet.addRow([
+            row.push([
               "PKT",
               item?.khhdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
@@ -498,8 +502,9 @@ const Main = ({ token }) => {
               "",
             ]);
           });
-
-          sheet.addRow([
+          // stt = stt + 3;
+          // console.log(stt);
+          row.push([
             "PKT",
             item?.khhdon,
             item?.ntao.split("T")[0].split("-").reverse().join("/"),
@@ -547,9 +552,18 @@ const Main = ({ token }) => {
           ]);
         });
 
+      row
+        .map((item, i) => {
+          item[36] = stt + i;
+          return item;
+        })
+        .forEach((item) => sheet.addRow(item));
+      setSTT(stt + row.length - 1);
       const buf = await workBook.xlsx.writeBuffer();
       saveAs(new Blob([buf]), `dataModified.xlsx`);
     } else {
+      let row = [];
+      let middleSTT = stt;
       // const sheet = workBook.addWorksheet("chitiethoadon");
       sheet.addRow([
         "Loại CT",
@@ -600,7 +614,7 @@ const Main = ({ token }) => {
         .forEach((item) => {
           let thueRow = [];
           item.hdhhdvu.forEach((el) => {
-            sheet.addRow([
+            row.push([
               "HD",
               item?.khhdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
@@ -647,7 +661,7 @@ const Main = ({ token }) => {
               "",
             ]);
 
-            sheet.addRow([
+            row.push([
               "TDXK",
               item?.khhdon,
               item?.ntao.split("T")[0].split("-").reverse().join("/"),
@@ -751,109 +765,71 @@ const Main = ({ token }) => {
           if (
             item.hdhhdvu.every((el) => el.ltsuat === item.hdhhdvu[0].ltsuat)
           ) {
-            thueRow.forEach((el) => sheet.addRow(el));
+            row.push([
+              "HD",
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "131",
+              "33311",
+              item?.thttltsuat[0]?.tthue,
+              "Thuế GTGT",
+              khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
+              "",
+              "",
+              "",
+              "",
+              "1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              item?.nmten,
+              item?.nmdchi,
+              "",
+              item?.nmten,
+              item?.nmdchi,
+              item?.nmmst,
+              "",
+              "",
+              "",
+              item?.thttltsuat[0]?.tsuat
+                ? item?.thttltsuat[0]?.tsuat === "KCT"
+                  ? item?.thttltsuat[0]?.tsuat
+                  : item?.thttltsuat[0]?.tsuat.replace("%", "")
+                : "",
+              "",
+              item?.khhdon,
+              item?.khhdon,
+              item?.ntao.split("T")[0].split("-").reverse().join("/"),
+              "A1",
+              "1",
+              "",
+              moment().format("DD/MM/yyy"),
+              "ADM",
+              "",
+            ]);
           } else {
-            if (selected.value === "buy") {
-              sheet.addRow([
-                "HD",
-                item?.khhdon,
-                item?.ntao.split("T")[0].split("-").reverse().join("/"),
-                "131",
-                "33311",
-                item?.thttltsuat[0]?.tthue,
-                "Thuế GTGT",
-                "",
-                khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
-                "",
-                "",
-                "",
-                "1",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                item?.nbten,
-                item?.nbdchi,
-                "",
-                item?.nbten,
-                item?.nbdchi,
-                item?.nbmst,
-                "",
-                "",
-                "",
-                item?.thttltsuat[0]?.tsuat
-                  ? item?.thttltsuat[0]?.tsuat === "KCT"
-                    ? item?.thttltsuat[0]?.tsuat
-                    : item?.thttltsuat[0]?.tsuat.replace("%", "")
-                  : "",
-                "",
-                item?.khhdon,
-                item?.khhdon,
-                item?.ntao.split("T")[0].split("-").reverse().join("/"),
-                "A1",
-                "1",
-                "",
-                moment().format("DD/MM/yyy"),
-                "ADM",
-                "",
-              ]);
-            } else {
-              sheet.addRow([
-                "HD",
-                item?.khhdon,
-                item?.ntao.split("T")[0].split("-").reverse().join("/"),
-                "131",
-                "33311",
-                item?.thttltsuat[0]?.tthue,
-                "Thuế GTGT",
-                khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
-                "",
-                "",
-                "",
-                "",
-                "1",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                item?.nmten,
-                item?.nmdchi,
-                "",
-                item?.nmten,
-                item?.nmdchi,
-                item?.nmmst,
-                "",
-                "",
-                "",
-                item?.thttltsuat[0]?.tsuat
-                  ? item?.thttltsuat[0]?.tsuat === "KCT"
-                    ? item?.thttltsuat[0]?.tsuat
-                    : item?.thttltsuat[0]?.tsuat.replace("%", "")
-                  : "",
-                "",
-                item?.khhdon,
-                item?.khhdon,
-                item?.ntao.split("T")[0].split("-").reverse().join("/"),
-                "A1",
-                "1",
-                "",
-                moment().format("DD/MM/yyy"),
-                "ADM",
-                "",
-              ]);
-            }
+            row = [...row, ...thueRow];
           }
+
+          row
+            .map((item, i) => {
+              item[36] = stt + i;
+              return item;
+            })
+            .forEach((item) => sheet.addRow(item));
+          setSTT(stt + row.length - 1);
         });
+
       const buf = await workBook.xlsx.writeBuffer();
       saveAs(new Blob([buf]), `dataModified.xlsx`);
     }
   };
+
+  console.log(STT);
 
   const handleOnClick = () => {
     setIsEnable(true);
@@ -875,6 +851,9 @@ const Main = ({ token }) => {
       // Get all table names
       // const tables = reader.getTableNames();
       // console.log(tables);
+
+      const socai = reader.getTable("SoCai");
+      setSTT(socai.getData({ rowOffset: socai.rowCount - 1 })[0].RECNO);
 
       const khachhang = reader.getTable("KhachHang");
       setkhachHang(
@@ -903,7 +882,7 @@ const Main = ({ token }) => {
     }
   };
 
-  console.log(khachHang, vatTu);
+  console.log(STT);
 
   return (
     <div className=" w-[100vw] h-[100vh] align-middle flex flex-col p-4 gap-2 justify-center items-center">
@@ -1008,6 +987,7 @@ const Main = ({ token }) => {
             dataQueries.length === 0 ||
             khachHang.length === 0 ||
             vatTu.length === 0 ||
+            STT === null ||
             dataQueries.every((item) => !item.isSuccess) ||
             dataQueries.some((item) => item.isLoading)
           }
