@@ -857,15 +857,18 @@ const Main = ({ token }) => {
 
       const khachhang = reader.getTable("KhachHang");
       setkhachHang(
-        khachhang
-          .getData()
-          .map((item) => ({ ...item, TENKH: toUnicode(item.TENKH, "TCVN3") }))
+        khachhang.getData().map((item) => ({
+          ...item,
+          MAKH: toUnicode(item.MAKH, "TCVN3"),
+          TENKH: toUnicode(item.TENKH, "TCVN3"),
+        }))
       );
 
       const vattu = reader.getTable("VTHH");
       setVatTu(
         vattu.getData().map((item) => ({
           ...item,
+          MAVTHH: toUnicode(item.MAVTHH, "TCVN3"),
           TENVTHH: toUnicode(item.TENVTHH, "TCVN3"),
         }))
       );
