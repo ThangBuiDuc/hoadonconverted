@@ -192,7 +192,11 @@ const Main = ({ token }) => {
         // console.log(tables);
 
         const socai = reader.getTable("SoCai");
-        setSTT(socai.getData({ rowOffset: socai.rowCount - 1 })[0].RECNO);
+        setSTT(
+          socai.getData().reduce((max, num) => {
+            return num.RECNO > max ? num.RECNO : max;
+          }, -Infinity)
+        );
 
         const khachhang = reader.getTable("KhachHang");
         setkhachHang(
@@ -577,7 +581,7 @@ const Main = ({ token }) => {
             "",
             khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
             "",
-            "1",
+            "",
             "",
             "",
             "",
@@ -790,7 +794,7 @@ const Main = ({ token }) => {
                 "",
                 "",
                 "",
-                "1",
+                "",
                 "",
                 "",
                 "",
@@ -842,7 +846,7 @@ const Main = ({ token }) => {
               "",
               "",
               "",
-              "1",
+              "",
               "",
               "",
               "",
