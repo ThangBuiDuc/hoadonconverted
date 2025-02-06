@@ -352,6 +352,24 @@ const Main = ({ token }) => {
       dataQueries
         .reduce((total, item) => [...total, ...item.data], [])
         .reduce((total, item) => [...total, item.detailInvoices], [])
+        .sort((a, b) => {
+          const [d1, m1, y1] = a?.ntao
+            .split("T")[0]
+            .split("-")
+            .reverse()
+            .join("/")
+            .split("/")
+            .map(Number);
+          const [d2, m2, y2] = b?.ntao
+            .split("T")[0]
+            .split("-")
+            .reverse()
+            .join("/")
+            .split("/")
+            .map(Number);
+
+          return new Date(y1, m1 - 1, d1) - new Date(y2, m2 - 1, d2);
+        })
         .forEach((item) => {
           let ttchung = [
             `${item?.khmshdon}`,
@@ -471,6 +489,24 @@ const Main = ({ token }) => {
       dataQueries
         .reduce((total, item) => [...total, ...item.data], [])
         .reduce((total, item) => [...total, item.detailInvoices], [])
+        .sort((a, b) => {
+          const [d1, m1, y1] = a?.ntao
+            .split("T")[0]
+            .split("-")
+            .reverse()
+            .join("/")
+            .split("/")
+            .map(Number);
+          const [d2, m2, y2] = b?.ntao
+            .split("T")[0]
+            .split("-")
+            .reverse()
+            .join("/")
+            .split("/")
+            .map(Number);
+
+          return new Date(y1, m1 - 1, d1) - new Date(y2, m2 - 1, d2);
+        })
         .forEach((item) => {
           // let thueRow;
           item.hdhhdvu.forEach((el) => {
@@ -483,10 +519,14 @@ const Main = ({ token }) => {
               el?.thtien,
               `Mua ${el?.ten}`,
               "",
-              khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
+              khachHang.find(
+                (el1) => el1.TENKH.toLowerCase() === item?.nbten.toLowerCase()
+              )?.MAKH,
               "",
               "1",
-              vatTu.find((el1) => el1.TENVTHH === el?.ten)?.MAVTHH,
+              vatTu.find(
+                (el1) => el1.TENVTHH.toLowerCase() === el?.ten.toLowerCase()
+              )?.MAVTHH,
               "",
               "",
               el?.ten,
@@ -579,7 +619,9 @@ const Main = ({ token }) => {
             item?.thttltsuat[0]?.tthue,
             "Thuế GTGT",
             "",
-            khachHang.find((el1) => el1.TENKH === item?.nbten)?.MAKH,
+            khachHang.find(
+              (el1) => el1.TENKH.toLowerCase() === item?.nbten.toLowerCase()
+            )?.MAKH,
             "",
             "",
             "",
@@ -679,6 +721,24 @@ const Main = ({ token }) => {
       dataQueries
         .reduce((total, item) => [...total, ...item.data], [])
         .reduce((total, item) => [...total, item.detailInvoices], [])
+        .sort((a, b) => {
+          const [d1, m1, y1] = a?.ntao
+            .split("T")[0]
+            .split("-")
+            .reverse()
+            .join("/")
+            .split("/")
+            .map(Number);
+          const [d2, m2, y2] = b?.ntao
+            .split("T")[0]
+            .split("-")
+            .reverse()
+            .join("/")
+            .split("/")
+            .map(Number);
+
+          return new Date(y1, m1 - 1, d1) - new Date(y2, m2 - 1, d2);
+        })
         .forEach((item) => {
           let thueRow = [];
           item.hdhhdvu.forEach((el) => {
@@ -690,13 +750,17 @@ const Main = ({ token }) => {
               "5111",
               el?.thtien,
               `Bán ${el?.ten}`,
-              khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
+              khachHang.find(
+                (el1) => el1.TENKH.toLowerCase() === item?.nmten.toLowerCase()
+              )?.MAKH,
               "",
               "",
               "",
               "",
               "1",
-              vatTu.find((el1) => el1.TENVTHH === el?.ten)?.MAVTHH,
+              vatTu.find(
+                (el1) => el1.TENVTHH.toLowerCase() === el?.ten.toLowerCase()
+              )?.MAVTHH,
               el?.ten,
               el?.dvtinh,
               el?.sluong,
@@ -737,13 +801,17 @@ const Main = ({ token }) => {
               "156",
               "",
               `Bán ${el?.ten}`,
-              khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
+              khachHang.find(
+                (el1) => el1.TENKH.toLowerCase() === item?.nmten.toLowerCase()
+              )?.MAKH,
               "",
               "",
               "",
               "",
               "1",
-              vatTu.find((el1) => el1.TENVTHH === el?.ten)?.MAVTHH,
+              vatTu.find(
+                (el1) => el1.TENVTHH.toLowerCase() === el?.ten.toLowerCase()
+              )?.MAVTHH,
               el?.ten,
               el?.dvtinh,
               el?.sluong,
@@ -789,7 +857,9 @@ const Main = ({ token }) => {
                     (parseInt(el.ltsuat.replace("%", "")) / 100)
                   : 0,
                 "Thuế GTGT",
-                khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
+                khachHang.find(
+                  (el1) => el1.TENKH.toLowerCase() === item?.nmten.toLowerCase()
+                )?.MAKH,
                 "",
                 "",
                 "",
@@ -841,7 +911,9 @@ const Main = ({ token }) => {
               "33311",
               item?.thttltsuat[0]?.tthue,
               "Thuế GTGT",
-              khachHang.find((el1) => el1.TENKH === item?.nmten)?.MAKH,
+              khachHang.find(
+                (el1) => el1.TENKH.toLowerCase() === item?.nmten.toLowerCase()
+              )?.MAKH,
               "",
               "",
               "",
