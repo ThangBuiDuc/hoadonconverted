@@ -7,7 +7,9 @@ const Main = dynamic(() => import("./main"), { ssr: false });
 const Content = ({ captchaData }) => {
   const [key, SetKey] = useState("");
   const [isVerify, setIsVerify] = useState(false);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(
+    "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMjAwOTA2MDQ5IiwidHlwZSI6MiwiZXhwIjoxNzM4ODk0NTM3LCJpYXQiOjE3Mzg4MDgxMzd9.ef4NBQEKBb49KYxgh2ukvFeSLM5QZEU2Z-Wlluy6uLF4T0P5Wp2GSJ1bL6__SlTHE9s1AbweKDsSeSs-TXvEfQ"
+  );
 
   const verify = (e) => {
     e.preventDefault();
