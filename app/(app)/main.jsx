@@ -720,6 +720,10 @@ const Main = ({ token }) => {
 
       dataQueries
         .reduce((total, item) => [...total, ...item.data], [])
+        .reduce((total, item) => {
+          if (total.some((el) => el.mhdon === item.mhdon)) return total;
+          return [...total, item];
+        }, [])
         .reduce((total, item) => [...total, item.detailInvoices], [])
         .sort((a, b) => {
           const [d1, m1, y1] = a?.ntao
@@ -737,7 +741,10 @@ const Main = ({ token }) => {
             .split("/")
             .map(Number);
 
-          return new Date(y1, m1 - 1, d1) - new Date(y2, m2 - 1, d2);
+          return (
+            new Date(y1, m1 - 1, d1) - new Date(y2, m2 - 1, d2) ||
+            a.shdon - b.shdon
+          );
         })
         .forEach((item) => {
           let thueRow = [];
@@ -801,9 +808,7 @@ const Main = ({ token }) => {
               "156",
               "",
               `Bán ${el?.ten}`,
-              khachHang.find(
-                (el1) => el1.TENKH.toLowerCase() === item?.nmten.toLowerCase()
-              )?.MAKH,
+              "",
               "",
               "",
               "",
@@ -954,16 +959,14 @@ const Main = ({ token }) => {
           } else {
             row = [...row, ...thueRow];
           }
-
-          row
-            .map((item, i) => {
-              item[36] = stt + i;
-              return item;
-            })
-            .forEach((item) => sheet.addRow(item));
-          setSTT(stt + row.length - 1);
         });
-
+      row
+        .map((item, i) => {
+          item[36] = stt + i;
+          return item;
+        })
+        .forEach((item) => sheet.addRow(item));
+      setSTT(stt + row.length - 1);
       const buf = await workBook.xlsx.writeBuffer();
       saveAs(new Blob([buf]), `sold-dataModified.xlsx`);
       ref.current.value = "";
